@@ -1,0 +1,38 @@
+<container>
+  <row>
+    <div class='col-xs-12'>
+      <h1>Proportion Views: {{currentYear}}</h1>
+      <p>Canadian exports shown in successive pie charts - click on each slice to see more details.</p>
+      <form class="form-inline">
+        <label class="form-control-label" for="yearList">Select Year: &nbsp;</label>
+        <!--<select class="form-control" id="yearList" [ngModel]="currentYear" #selectyear (change)="onYearSelected($event, selectyear.value)" >
+          <option [value]="year" *ngFor="let year of years">{{year}}</option>
+        </select>-->
+        <md-slider (change)="onYearSliderChange($event)" style="width: 400px" min="2012" max="2017" step="1" value="2015" tick-interval="1" thumbLabel="true"></md-slider>
+      </form>
+      <br/>
+    </div>
+  </row>
+  <row>
+    <div class='offset-xs-1 col-xs-10'>
+      <main-pie-chart (onSelected)="onMainChartSelected($event)" [header]="title" [chartData]="mainPieChartData" ></main-pie-chart>
+    </div>
+    <div class='offset-xs-1 col-xs-10'>
+      <div class="text-xs-center" id="example-caption-1">Pie Shows {{(totalVal/grandTotalVal * 100).toFixed(1)}}% of Total Exports</div>
+      <md-progress-bar class="example-margin" color="accent" mode="buffer" [value]="(totalVal/grandTotalVal * 100).toFixed(1)" bufferValue="0"> </md-progress-bar>
+    </div>
+  </row>
+
+
+  <row>
+    <div class='col-xs-12'>
+      <h2>Previous Views:</h2>
+    </div>
+  </row>
+  <row>
+    <div class='col-xs-12'>
+        <pie-chart-list (onChartFocus)="onNewChartFocus($event)"></pie-chart-list>
+    </div>
+
+  </row>
+</container>

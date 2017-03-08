@@ -1,0 +1,32 @@
+<container>
+  <row>
+    <div class='col-xs-12'>
+      <h1>Export Geographies: {{year}}</h1>
+      <p>Canadian exports shown on maps:</p>
+      <form class="form-inline">
+        <label class="form-control-label" for="mapList">Change Region: &nbsp;</label>
+        <select class="form-control" id="mapList" [ngModel]="chartOptions.region" #region (change)="onRegionSelected($event, region)" >
+          <option [value]="region[0]" *ngFor="let region of regions">{{region[1]}}</option>
+        </select>
+        <div *ngIf="territory == 'World'" class="form-check">
+        <label class="form-check-label">
+          <input (change)='includeUSChanged($event)' type="checkbox" class="form-check-input" checked>
+          Include US Data
+        </label>
+
+      </div>
+      </form>
+      <br/>
+      <label> Select Year: </label>
+      <md-slider (change)="onYearSliderChange($event)" style="width: 400px" min="2012" max="2017" step="1" value="2015" tick-interval="1" thumbLabel="true"></md-slider>
+
+      <br/><br/>
+      <div GoogleChart [test]="test" [id]="id" [chartData]="data" [chartOptions]="chartOptions" [chartType]="chartType"></div>
+      <br/><br/>
+    </div>
+    <div class='offset-xs-1 col-xs-10'>
+      <div class="text-xs-center" id="example-caption-1">Map Shows {{(total/grand_total * 100).toFixed(1)}}% of Total Exports</div>
+      <md-progress-bar class="example-margin" color="accent" mode="buffer" [value]="(total/grand_total * 100).toFixed(1)" bufferValue="0"> </md-progress-bar>
+    </div>
+  </row>
+</container>

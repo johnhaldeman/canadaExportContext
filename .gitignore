@@ -10,3 +10,12 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+frontend/node_modules/
+frontend/font-awesome-4.7.0/
+frontend/chartAngular2.zip
+frontend/bootstrap-grid.css
+frontend/bootstrap-old.css
+frontend/bootstrap.css
+frontend/fonts/glyphicons-halflings-regular.eot
+frontend/fonts/
+frontend/npm-debug.log.1606726311
