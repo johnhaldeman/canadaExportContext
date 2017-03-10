@@ -3,20 +3,24 @@
     <div class='col-xs-12'>
       <h1>Export Geographies: {{year}}</h1>
       <p>Canadian exports shown on maps:</p>
+      <br/>
       <form class="form-inline">
-        <label class="form-control-label" for="mapList">Change Region: &nbsp;</label>
+        <!--<label class="form-control-label" for="mapList">Change Region: &nbsp;</label>
         <select class="form-control" id="mapList" [ngModel]="chartOptions.region" #region (change)="onRegionSelected($event, region)" >
           <option [value]="region[0]" *ngFor="let region of regions">{{region[1]}}</option>
-        </select>
-        <div *ngIf="territory == 'World'" class="form-check">
-        <label class="form-check-label">
-          <input (change)='includeUSChanged($event)' type="checkbox" class="form-check-input" checked>
-          Include US Data
-        </label>
+        </select>-->
 
-      </div>
+        <md-select placeholder="Region" [(ngModel)]="territory" name="territoryDrop" value="world" (change)="onRegionSelected($event)">
+          <md-option *ngFor="let region of regions" [value]="region[0]">
+            {{region[1]}}
+          </md-option>
+        </md-select>
+        <div class="form-check">
+          <md-slide-toggle [disabled]="territory != 'World'" color="accent" checked="true" (change)='includeUSChanged($event)'>
+            Include US Data
+          </md-slide-toggle>
+        </div>
       </form>
-      <br/>
       <label> Select Year: </label>
       <md-slider (change)="onYearSliderChange($event)" style="width: 400px" min="2012" max="2017" step="1" value="2015" tick-interval="1" thumbLabel="true"></md-slider>
 

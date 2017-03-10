@@ -19,3 +19,5 @@ frontend/bootstrap.css
 frontend/fonts/glyphicons-halflings-regular.eot
 frontend/fonts/
 frontend/npm-debug.log.1606726311
+.metadata/
+backend/build/classes/.gitignore

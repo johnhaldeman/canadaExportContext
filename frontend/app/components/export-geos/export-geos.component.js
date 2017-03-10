@@ -72,19 +72,20 @@ var ExportGeosComponent = (function () {
         }, function (error) { return _this.errorMessage = error; });
     };
     ExportGeosComponent.prototype.includeUSChanged = function (event) {
-        this.include_us = event.target.checked;
-        console.log(this.include_us);
+        this.include_us = event.checked;
         this.getGeoData();
     };
-    ExportGeosComponent.prototype.onRegionSelected = function (event, region) {
-        this.chartOptions.region = region.value;
+    ExportGeosComponent.prototype.onRegionSelected = function (event) {
+        this.chartOptions.region = event.value;
+        console.log(event.value);
         for (var i = 0; i < this.regions.length; i++) {
-            if (this.regions[i][0] == region.value) {
+            if (this.regions[i][0] == event.value) {
                 this.chartOptions.resolution = this.regions[i][2];
                 this.territory = this.regions[i][1];
+                console.log(this.regions[i]);
             }
         }
-        this.test = region.value;
+        this.test = event.value;
         this.getGeoData();
     };
     ExportGeosComponent.prototype.onYearSliderChange = function (event) {
