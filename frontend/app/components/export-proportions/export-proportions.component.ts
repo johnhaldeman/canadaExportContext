@@ -28,9 +28,11 @@ export class ExportProportionsComponent {
   }
 
   onYearSliderChange(event){
-    this.currentYear = event.value;
-    this.chartList.clear();
-    this.getHS2Data();
+    if(event.value != this.currentYear){
+      this.currentYear = event.value;
+      this.chartList.clear();
+      this.getHS2Data();
+    }
   }
 
 

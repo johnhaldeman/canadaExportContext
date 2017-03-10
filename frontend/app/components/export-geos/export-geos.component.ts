@@ -88,9 +88,11 @@ export class ExportGeosComponent {
     }
 
     onYearSliderChange(event){
-      this.year = event.value;
-      this.test = event.value;
-      this.getGeoData();
+      if(event.value != this.year){
+        this.year = event.value;
+        this.test = event.value;
+        this.getGeoData();
+      }
     }
 
 

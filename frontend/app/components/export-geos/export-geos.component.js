@@ -89,9 +89,11 @@ var ExportGeosComponent = (function () {
         this.getGeoData();
     };
     ExportGeosComponent.prototype.onYearSliderChange = function (event) {
-        this.year = event.value;
-        this.test = event.value;
-        this.getGeoData();
+        if (event.value != this.year) {
+            this.year = event.value;
+            this.test = event.value;
+            this.getGeoData();
+        }
     };
     return ExportGeosComponent;
 }());

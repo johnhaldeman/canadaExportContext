@@ -23,9 +23,11 @@ var ExportProportionsComponent = (function () {
         this.currentYear = '2016';
     }
     ExportProportionsComponent.prototype.onYearSliderChange = function (event) {
-        this.currentYear = event.value;
-        this.chartList.clear();
-        this.getHS2Data();
+        if (event.value != this.currentYear) {
+            this.currentYear = event.value;
+            this.chartList.clear();
+            this.getHS2Data();
+        }
     };
     ExportProportionsComponent.prototype.ngOnInit = function () {
         this.getHS2Data();
