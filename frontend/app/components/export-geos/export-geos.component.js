@@ -40,24 +40,25 @@ var ExportGeosComponent = (function () {
         };
         this.id = 'geochart1';
         this.chartType = 'GeoChart';
-        if (!googleLoaded) {
-            googleLoaded = true;
-            google.charts.load('upcoming', { 'packages': ['geochart'] });
-        }
         this.include_us = true;
         this.territory = 'World';
         this.year = '2015';
         this.total = 0;
         this.grand_total = 0;
-        this.data = new google.visualization.DataTable();
-        this.data.addColumn('string', 'Region');
-        this.data.addColumn('number', 'ExportValue');
-        this.data.addColumn({ type: 'string', role: 'tooltip' });
-        //this.data.addColumn('string', 'year');
-        //this.data.addColumn('string', 'territory');
     }
-    ExportGeosComponent.prototype.ngOnInit = function () {
-        this.getGeoData();
+    ExportGeosComponent.prototype.ngAfterViewInit = function () {
+        var _this = this;
+        if (!googleLoaded) {
+            googleLoaded = true;
+            google.charts.load('upcoming', { 'packages': ['geochart'] });
+        }
+        google.charts.setOnLoadCallback(function () {
+            _this.data = new google.visualization.DataTable();
+            _this.data.addColumn('string', 'Region');
+            _this.data.addColumn('number', 'ExportValue');
+            _this.data.addColumn({ type: 'string', role: 'tooltip' });
+            _this.getGeoData();
+        });
     };
     ExportGeosComponent.prototype.getGeoData = function () {
         var _this = this;
