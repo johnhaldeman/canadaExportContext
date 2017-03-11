@@ -6,7 +6,7 @@ import { Component } from '@angular/core';
     <nav class="navbar navbar-dark bg-inverse">
       <!-- <div class="container-fluid"> -->
         <!-- Brand and toggle get grouped for better mobile display -->
-        <a class="navbar-brand" href="#"><i class="fa fa-exchange" aria-hidden="true"></i>&nbsp; Canadian Trade in Context</a>
+        <a class="navbar-brand" routerLink="/"><i class="fa fa-exchange" aria-hidden="true"></i>&nbsp; Canadian Trade in Context</a>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
         <!-- <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">-->

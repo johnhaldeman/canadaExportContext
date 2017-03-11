@@ -14,6 +14,7 @@ import { ExportGeoService } from './services/export_geos.service';
 import { PieChartList } from './components/pie-chart-list/PieChartList';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AboutComponent } from './components/about-component/about-component';
+import { HomeComponent } from './components/home/home-component';
 import { ExportGeosComponent } from './components/export-geos/export-geos.component';
 import { MaterialModule } from '@angular/material';
 import 'hammerjs';
@@ -22,12 +23,15 @@ const appRoutes: Routes = [
   { path: 'proportions', component: ExportProportionsComponent },
   { path: 'geos', component: ExportGeosComponent },
   { path: 'about', component: AboutComponent },
-  { path: '**', component: ExportProportionsComponent }
+  { path: '', component: HomeComponent },
+  { path: '**', component: HomeComponent }
 ];
 
 @NgModule({
   imports:      [ BrowserModule, HttpModule, JsonpModule, NgbModule.forRoot(), RouterModule.forRoot(appRoutes), MaterialModule],
-  declarations: [ AppComponent, ExportProportionsComponent, GoogleChart, MainPieChart, PieChartList, AboutComponent, ExportGeosComponent ],
+  declarations: [ AppComponent, ExportProportionsComponent, GoogleChart,
+                  MainPieChart, PieChartList, AboutComponent, ExportGeosComponent,
+                  HomeComponent ],
   bootstrap:    [ AppComponent ],
   schemas:      [ NO_ERRORS_SCHEMA ],
   providers:    [ ExportProportionService, ExportYearsService, ExportGeoService ]
