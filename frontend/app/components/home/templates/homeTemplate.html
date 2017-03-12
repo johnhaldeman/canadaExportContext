@@ -1,15 +1,14 @@
-<container>
+<div class="container">
   <row>
     <div class='col-xs-12'>
       <div class="jumbotron">
-        <div class="container">
-          <h1 class="display-3">Canadian Exports in Context</h1><br/>
+          <h1 class="display-6">Canadian Exports in Context</h1><br/>
           <p>A website for visualizing Canadian Export Data. There are currently 2 visualizations. More to be added periodically.</p>
-        </div>
       </div>
     </div>
-    <div class="container">
-      <div class='col-xs-6'>
+  </row>
+  <row>
+      <div class='col-xs-12 col-sm-6'>
         <div (click)="redirectToProp()" class="card-clickable card card-inverse card-background">
           <h3 class="card-header card-background">Export Proportions</h3>
           <div class="card-block">
@@ -18,15 +17,14 @@
           </div>
         </div>
       </div>
-      <div class='col-xs-6'>
+      <div class='col-xs-12 col-sm-6'>
         <div (click)="redirectToGeos()" class="card-clickable card card-inverse card-background">
           <h3 class="card-header card-background">Export Geographies</h3>
           <div class="card-block">
-            <h4 class="card-title">View export amounts by country and US states on interactive maps.</h4>
+            <h4 class="card-title">View export amounts by country and US state on maps.</h4>
             <img class="card-img-bottom" src="geoChart.png" />
           </div>
         </div>
       </div>
-    </div>
   </row>
-</container>
+</div>
