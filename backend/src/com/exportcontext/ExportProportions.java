@@ -25,7 +25,7 @@ import com.google.gson.GsonBuilder;
 /**
  * Servlet implementation class JDBCTest
  */
-@WebServlet("/ExportProportions")
+@WebServlet("/services/ExportProportions")
 public class ExportProportions extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 

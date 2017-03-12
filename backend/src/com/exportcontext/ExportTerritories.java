@@ -22,7 +22,7 @@ import com.google.gson.GsonBuilder;
 /**
  * Servlet implementation class ExportGeos
  */
-@WebServlet("/ExportTerritories")
+@WebServlet("/services/ExportTerritories")
 public class ExportTerritories extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
