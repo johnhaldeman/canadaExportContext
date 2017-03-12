@@ -17,7 +17,7 @@ require("rxjs/add/operator/catch");
 var ExportYearsService = (function () {
     function ExportYearsService(http) {
         this.http = http;
-        this.url = 'http://localhost:8080/ExportContext/ExportYears';
+        this.url = '/services/ExportYears';
     }
     ExportYearsService.prototype.getYearData = function () {
         return this.http.get(this.url)

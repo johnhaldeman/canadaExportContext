@@ -23,7 +23,7 @@ exports.ExportProportionData = ExportProportionData;
 var ExportProportionService = (function () {
     function ExportProportionService(http) {
         this.http = http;
-        this.expPrefix = 'http://localhost:8080/ExportContext/';
+        this.expPrefix = '/services/';
         this.expContextURL = this.expPrefix + 'ExportProportions'; // URL to web api
     }
     ExportProportionService.prototype.getPropData = function (resource) {

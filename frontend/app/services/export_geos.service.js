@@ -23,7 +23,7 @@ exports.ExportGeoData = ExportGeoData;
 var ExportGeoService = (function () {
     function ExportGeoService(http) {
         this.http = http;
-        this.url = 'http://localhost:8080/ExportContext/ExportGeos';
+        this.url = '/services/ExportGeos';
     }
     ExportGeoService.prototype.getYearData = function () {
         return this.http.get(this.url)

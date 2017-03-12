@@ -12,7 +12,7 @@ export class ExportProportionData{
 
 @Injectable()
 export class ExportProportionService {
-  private expPrefix = 'http://localhost:8080/ExportContext/';
+  private expPrefix = '/services/';
   private expContextURL = this.expPrefix + 'ExportProportions';  // URL to web api
 
   constructor(private http: Http) { }

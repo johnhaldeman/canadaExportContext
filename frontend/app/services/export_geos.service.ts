@@ -13,7 +13,7 @@ export class ExportGeoData{
 @Injectable()
 export class ExportGeoService {
 
-  private url = 'http://localhost:8080/ExportContext/ExportGeos';
+  private url = '/services/ExportGeos';
   constructor(private http: Http) { }
 
   getYearData(): Observable<string[]>{

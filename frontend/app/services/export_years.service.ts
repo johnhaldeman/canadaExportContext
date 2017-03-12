@@ -7,7 +7,7 @@ import 'rxjs/add/operator/catch';
 @Injectable()
 export class ExportYearsService {
 
-  private url = 'http://localhost:8080/ExportContext/ExportYears';
+  private url = '/services/ExportYears';
   constructor(private http: Http) { }
 
   getYearData(): Observable<string[]>{
