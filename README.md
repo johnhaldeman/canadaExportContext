@@ -11,3 +11,5 @@ This site was created by John Haldeman in order to learn more about the followin
 
 The site also uses a Java based backend providing REST over HTTP services that query a PostgreSQL database.
 
+The site is currently hosted at [http://www.tradecontext.ca/](http://www.tradecontext.ca/).
+
