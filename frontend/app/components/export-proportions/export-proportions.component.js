@@ -13,25 +13,42 @@ var core_1 = require("@angular/core");
 var export_proportions_service_1 = require("../../services/export_proportions.service");
 var export_years_service_1 = require("../../services/export_years.service");
 var PieChartList_1 = require("../pie-chart-list/PieChartList");
+var router_1 = require("@angular/router");
 var ExportProportionsComponent = (function () {
-    function ExportProportionsComponent(exportPropService, exportYearsService) {
+    function ExportProportionsComponent(exportPropService, exportYearsService, route, router) {
+        var _this = this;
         this.exportPropService = exportPropService;
         this.exportYearsService = exportYearsService;
+        this.route = route;
+        this.router = router;
         this.mainPieChartData = [];
         this.totalVal = 0;
         this.grandTotalVal = 1;
         this.currentYear = '2016';
+        router.events.subscribe(function (event) {
+            if (_this.route.snapshot.params['year'] != _this.currentYear) {
+                _this.redrawOnNavigation();
+                console.log('navigation triggered');
+                console.log(_this.route.snapshot.params);
+            }
+        });
     }
     ExportProportionsComponent.prototype.onYearSliderChange = function (event) {
         if (event.value != this.currentYear) {
-            this.currentYear = event.value;
+            console.log('slider event triggered');
             this.chartList.clear();
-            this.getHS2Data();
+            this.router.navigate(['proportions', event.value]);
         }
     };
     ExportProportionsComponent.prototype.ngOnInit = function () {
-        this.getHS2Data();
+        this.redrawOnNavigation();
         this.getYearData();
+    };
+    ExportProportionsComponent.prototype.redrawOnNavigation = function () {
+        if (this.route.snapshot.params['year'])
+            this.currentYear = this.route.snapshot.params['year'];
+        console.log('redrawing with ' + this.currentYear);
+        this.getHS2Data();
     };
     ExportProportionsComponent.prototype.getYearData = function () {
         var _this = this;
@@ -88,7 +105,9 @@ ExportProportionsComponent = __decorate([
         templateUrl: '/app/components/export-proportions/templates/exportProportionsTemplate.html'
     }),
     __metadata("design:paramtypes", [export_proportions_service_1.ExportProportionService,
-        export_years_service_1.ExportYearsService])
+        export_years_service_1.ExportYearsService,
+        router_1.ActivatedRoute,
+        router_1.Router])
 ], ExportProportionsComponent);
 exports.ExportProportionsComponent = ExportProportionsComponent;
 //# sourceMappingURL=export-proportions.component.js.map

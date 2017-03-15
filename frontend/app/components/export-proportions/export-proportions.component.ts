@@ -5,6 +5,7 @@ import {ExportProportionService} from '../../services/export_proportions.service
 import {ExportYearsService} from '../../services/export_years.service'
 import {PieChartList} from '../pie-chart-list/PieChartList'
 import {ChartDefinition} from '../chart-definition/ChartDefinition'
+import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 
 @Component({
   //selector: 'trade-app',
@@ -19,26 +20,44 @@ export class ExportProportionsComponent {
   private totalVal: number;
   private grandTotalVal: number;
   private currentYear: string;
+  private routeEventID: number;
 
   constructor(private exportPropService: ExportProportionService,
-    private exportYearsService: ExportYearsService) {
+    private exportYearsService: ExportYearsService,
+      private route: ActivatedRoute,
+      private router: Router) {
     this.totalVal = 0;
     this.grandTotalVal = 1;
     this.currentYear = '2016';
+
+    router.events.subscribe((event: NavigationEnd) => {
+      if(this.route.snapshot.params['year'] != this.currentYear){
+        this.redrawOnNavigation();
+        console.log('navigation triggered');
+        console.log(this.route.snapshot.params);
+      }
+    });
   }
 
   onYearSliderChange(event){
     if(event.value != this.currentYear){
-      this.currentYear = event.value;
+      console.log('slider event triggered');
       this.chartList.clear();
-      this.getHS2Data();
+      this.router.navigate(['proportions', event.value]);
     }
   }
 
 
   ngOnInit() {
+    this.redrawOnNavigation();
+    this.getYearData();
+  }
+
+  redrawOnNavigation(){
+    if(this.route.snapshot.params['year'])
+      this.currentYear = this.route.snapshot.params['year'];
+    console.log('redrawing with ' + this.currentYear );
     this.getHS2Data();
-    this.getYearData()
   }
 
   getYearData(){

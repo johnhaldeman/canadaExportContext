@@ -39,7 +39,6 @@ public class ExportGeos extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
 		response.setContentType("application/json");
 		
 		String yearStr = request.getParameter("year");
