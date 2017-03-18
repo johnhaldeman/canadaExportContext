@@ -307,34 +307,52 @@ public class ExportProportions extends HttpServlet {
 			
 			Vector<String> urlHistory = new Vector<String>();
 			
+			int hs2_rank = offset;
+			
 			if(level.equals("4") || level.equals("6")){
 				String hs2Parent = query;
 				if(level.equals("6"))
 					hs2Parent = getHS2Parent(conn, level, query);
-					
 				if(hs2Parent == null){
 					response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 					return;
 				}
 				
-				int hs2_rank = getHS2Rank(conn, year, hs2Parent);
-				if(hs2_rank < 0){
-					response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-					return;
-				}
+				hs2_rank = getHS2Rank(conn, year, hs2Parent);
+			}
+			if(hs2_rank < 0){
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				return;
+			}
 				
-				int histOffset = 0;
-				while(histOffset < hs2_rank){
-					urlHistory.add("ExportProportions?year="+year+
-							"&offset="+histOffset+
-							"&max="+(histOffset+10)+
-							"&level=2");
+			int histOffset = 1;
+			while(histOffset < hs2_rank){
+				urlHistory.add("ExportProportions?year="+year+
+						"&offset="+(histOffset)+
+						"&max="+(histOffset+9)+
+						"&level=2");
 					
-					histOffset += 10;
-				}
-				
-				
-				System.out.println(hs2_rank);
+				histOffset += 10;
+			}
+			
+			int hs4_rank = -1;
+			String hs4Parent = query;
+			if(level.equals("6")){
+				hs4_rank = getHS4Rank(conn, year, hs4Parent);
+			}
+			else if(level.equals("4")){
+				hs4_rank = offset;
+			}
+			
+			histOffset = 1;
+			while(histOffset < hs4_rank){
+				urlHistory.add("ExportProportions?year="+year+
+						"&offset="+(histOffset)+
+						"&max="+(histOffset+9)+
+						"&level=4"
+						+"&query=" + hs4Parent);
+					
+				histOffset += 10;
 			}
 			
 			if(urlHistory.size() > 0){
@@ -352,6 +370,34 @@ public class ExportProportions extends HttpServlet {
 		}
 	}
 
+	private int getHS4Rank(Connection conn, int year, String hs4Parent) throws SQLException {
+		PreparedStatement stmt;
+		ResultSet rs;
+		int hs4_rank;
+		stmt = conn.prepareStatement(""
+				+ "SELECT hs4e.VAL_RANK \n"
+				+ "   FROM ( \n"
+				+ "        SELECT HS_4_DESC, ROW_NUMBER() OVER (ORDER BY SUM(h4.VALUE) desc) VAL_RANK \n"
+				+ "        FROM HS4_PRECOMP h4 \n"
+				+ "        WHERE YEAR = ? \n"
+				+ "        GROUP BY h4.HS_4_DESC \n"
+				+ "    ) hs4e \n"
+				+ "WHERE hs4e.HS_4_DESC = ?");
+		
+		stmt.setInt(1, year);
+		stmt.setString(2, hs4Parent);
+		
+		rs = stmt.executeQuery();
+		
+		if(rs.next())
+			hs4_rank = rs.getInt("VAL_RANK");
+		else
+			hs4_rank = -1;
+		rs.close();
+		stmt.close();
+		return hs4_rank;
+	}
+	
 	private int getHS2Rank(Connection conn, int year, String hs2Parent) throws SQLException {
 		PreparedStatement stmt;
 		ResultSet rs;
@@ -385,10 +431,7 @@ public class ExportProportions extends HttpServlet {
 		ResultSet rs;
 		String hs2Parent;
 		String whereField = "";
-		if(level.equals("4"))
-			whereField = "HS_4_DESC";
-		else
-			whereField = "ENGLISH_DESCRIPTION";
+		whereField = "HS_4_DESC";
 			
 		stmt = conn.prepareStatement(""
 				+ "SELECT HS_2_DESC FROM CODE_LOOKUP WHERE " + whereField + " = ?");
