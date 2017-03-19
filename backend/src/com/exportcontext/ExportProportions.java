@@ -308,9 +308,9 @@ public class ExportProportions extends HttpServlet {
 			Vector<String> urlHistory = new Vector<String>();
 			
 			int hs2_rank = offset;
-			
+
+			String hs2Parent = query;
 			if(level.equals("4") || level.equals("6")){
-				String hs2Parent = query;
 				if(level.equals("6"))
 					hs2Parent = getHS2Parent(conn, level, query);
 				if(hs2Parent == null){
@@ -338,7 +338,7 @@ public class ExportProportions extends HttpServlet {
 			int hs4_rank = -1;
 			String hs4Parent = query;
 			if(level.equals("6")){
-				hs4_rank = getHS4Rank(conn, year, hs4Parent);
+				hs4_rank = getHS4Rank(conn, year, hs4Parent, hs2Parent);
 			}
 			else if(level.equals("4")){
 				hs4_rank = offset;
@@ -350,7 +350,7 @@ public class ExportProportions extends HttpServlet {
 						"&offset="+(histOffset)+
 						"&max="+(histOffset+9)+
 						"&level=4"
-						+"&query=" + hs4Parent);
+						+"&query=" + URLEncoder.encode(hs2Parent, "UTF-8"));
 					
 				histOffset += 10;
 			}
@@ -370,7 +370,7 @@ public class ExportProportions extends HttpServlet {
 		}
 	}
 
-	private int getHS4Rank(Connection conn, int year, String hs4Parent) throws SQLException {
+	private int getHS4Rank(Connection conn, int year, String hs4Parent, String hs2Parent) throws SQLException {
 		PreparedStatement stmt;
 		ResultSet rs;
 		int hs4_rank;
@@ -380,12 +380,14 @@ public class ExportProportions extends HttpServlet {
 				+ "        SELECT HS_4_DESC, ROW_NUMBER() OVER (ORDER BY SUM(h4.VALUE) desc) VAL_RANK \n"
 				+ "        FROM HS4_PRECOMP h4 \n"
 				+ "        WHERE YEAR = ? \n"
+				+ "        AND HS_2_DESC = ? \n"
 				+ "        GROUP BY h4.HS_4_DESC \n"
 				+ "    ) hs4e \n"
 				+ "WHERE hs4e.HS_4_DESC = ?");
 		
 		stmt.setInt(1, year);
-		stmt.setString(2, hs4Parent);
+		stmt.setString(2, hs2Parent);
+		stmt.setString(3, hs4Parent);
 		
 		rs = stmt.executeQuery();
 		
