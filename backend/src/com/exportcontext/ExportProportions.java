@@ -355,6 +355,19 @@ public class ExportProportions extends HttpServlet {
 				histOffset += 10;
 			}
 			
+			if(level.equals("6")){
+				histOffset = 1;
+				while(histOffset < offset){
+					urlHistory.add("ExportProportions?year="+year+
+							"&offset="+(histOffset)+
+							"&max="+(histOffset+9)+
+							"&level=6"
+							+"&query=" + URLEncoder.encode(query, "UTF-8"));
+						
+					histOffset += 10;
+				}
+			}
+			
 			if(urlHistory.size() > 0){
 				wr.println(", \"url_history\": ");
 				wr.println(gson.toJson(urlHistory));
