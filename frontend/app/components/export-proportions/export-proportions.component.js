@@ -8,6 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
 var export_proportions_service_1 = require("../../services/export_proportions.service");
 var export_years_service_1 = require("../../services/export_years.service");
@@ -83,10 +84,10 @@ var ExportProportionsComponent = (function () {
     };
     ExportProportionsComponent.prototype.onMainChartSelected = function (selected) {
         var _this = this;
-        console.log('User Selected: component' + JSON.stringify(selected));
         if (selected[0]) {
             var url = this.mainPieChartData[selected[0].row + 1][4];
             if (url != '') {
+                this.router.navigate(["proportions", this.currentYear, url]);
                 this.exportPropService.getPropData(url)
                     .subscribe(function (data) { return _this.processData(data); }, function (error) { return _this.processError(error); });
             }

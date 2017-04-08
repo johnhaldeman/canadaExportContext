@@ -100,10 +100,10 @@ export class ExportProportionsComponent {
   }
 
   onMainChartSelected(selected){
-      console.log('User Selected: component' + JSON.stringify(selected));
       if(selected[0]){
         let url = this.mainPieChartData[selected[0].row + 1][4];
         if(url != ''){
+          this.router.navigate(["proportions", this.currentYear, url])
           this.exportPropService.getPropData(url)
           .subscribe(
             data => this.processData(data),

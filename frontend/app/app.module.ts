@@ -21,7 +21,7 @@ import 'hammerjs';
 
 const appRoutes: Routes = [
   { path: 'proportions', component: ExportProportionsComponent },
-  { path: 'proportions/:year/:hslevel/:product/:offset', component: ExportProportionsComponent },
+  { path: 'proportions/:year/:url', component: ExportProportionsComponent },
   { path: 'proportions/:year', component: ExportProportionsComponent },
   { path: 'geos', component: ExportGeosComponent },
   { path: 'about', component: AboutComponent },

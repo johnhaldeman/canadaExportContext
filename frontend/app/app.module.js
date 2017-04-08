@@ -27,7 +27,7 @@ var material_1 = require("@angular/material");
 require("hammerjs");
 var appRoutes = [
     { path: 'proportions', component: export_proportions_component_1.ExportProportionsComponent },
-    { path: 'proportions/:year/:hslevel/:product/:offset', component: export_proportions_component_1.ExportProportionsComponent },
+    { path: 'proportions/:year/:url', component: export_proportions_component_1.ExportProportionsComponent },
     { path: 'proportions/:year', component: export_proportions_component_1.ExportProportionsComponent },
     { path: 'geos', component: export_geos_component_1.ExportGeosComponent },
     { path: 'about', component: about_component_1.AboutComponent },
