@@ -307,7 +307,7 @@ public class ExportProportions extends HttpServlet {
 			
 			Vector<String> urlHistory = new Vector<String>();
 			
-			int hs2_rank = offset;
+			int hs2_rank = offset - 1;
 
 			String hs2Parent = query;
 			if(level.equals("4") || level.equals("6")){
@@ -326,7 +326,7 @@ public class ExportProportions extends HttpServlet {
 			}
 				
 			int histOffset = 1;
-			while(histOffset < hs2_rank){
+			while(histOffset <= hs2_rank){
 				urlHistory.add("ExportProportions?year="+year+
 						"&offset="+(histOffset)+
 						"&max="+(histOffset+9)+
@@ -341,11 +341,11 @@ public class ExportProportions extends HttpServlet {
 				hs4_rank = getHS4Rank(conn, year, hs4Parent, hs2Parent);
 			}
 			else if(level.equals("4")){
-				hs4_rank = offset;
+				hs4_rank = offset - 1;
 			}
 			
 			histOffset = 1;
-			while(histOffset < hs4_rank){
+			while(histOffset <= hs4_rank){
 				urlHistory.add("ExportProportions?year="+year+
 						"&offset="+(histOffset)+
 						"&max="+(histOffset+9)+
@@ -357,7 +357,7 @@ public class ExportProportions extends HttpServlet {
 			
 			if(level.equals("6")){
 				histOffset = 1;
-				while(histOffset < offset){
+				while(histOffset <= offset - 1){
 					urlHistory.add("ExportProportions?year="+year+
 							"&offset="+(histOffset)+
 							"&max="+(histOffset+9)+
