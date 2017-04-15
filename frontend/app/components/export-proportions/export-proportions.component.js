@@ -26,18 +26,24 @@ var ExportProportionsComponent = (function () {
         this.grandTotalVal = 1;
         this.currentYear = '2016';
         router.events.subscribe(function (event) {
-            if (_this.route.snapshot.params['year'] != _this.currentYear) {
+            console.log("event");
+            if (_this.route.snapshot.params['url'] != _this.currentURL) {
+                console.log("url change");
+                _this.currentURL = _this.route.snapshot.params['url'];
                 _this.redrawOnNavigation();
-                console.log('navigation triggered');
-                console.log(_this.route.snapshot.params);
             }
         });
     }
     ExportProportionsComponent.prototype.onYearSliderChange = function (event) {
         if (event.value != this.currentYear) {
-            console.log('slider event triggered');
-            this.chartList.clear();
-            this.router.navigate(['proportions', event.value]);
+            var yearIndex = this.currentURL.indexOf("year=");
+            var newURL = this.currentURL.substr(0, yearIndex + 5);
+            newURL += event.value;
+            newURL += this.currentURL.substr(yearIndex + 9);
+            //console.log('slider event triggered');
+            //this.chartList.clear();
+            //this.router.navigate(['proportions', event.value]);
+            this.router.navigate(["proportions", newURL]);
         }
     };
     ExportProportionsComponent.prototype.ngOnInit = function () {
@@ -45,10 +51,14 @@ var ExportProportionsComponent = (function () {
         this.getYearData();
     };
     ExportProportionsComponent.prototype.redrawOnNavigation = function () {
-        if (this.route.snapshot.params['year'])
-            this.currentYear = this.route.snapshot.params['year'];
-        console.log('redrawing with ' + this.currentYear);
-        this.getHS2Data();
+        var _this = this;
+        if (this.route.snapshot.params['url']) {
+            this.exportPropService.getPropData(this.route.snapshot.params['url'])
+                .subscribe(function (data) { return _this.processData(data); }, function (error) { return _this.processError(error); });
+        }
+        else {
+            this.router.navigate(["proportions", "ExportProportions?year=2016&offset=1&max=10&level=2"]);
+        }
     };
     ExportProportionsComponent.prototype.getYearData = function () {
         var _this = this;
@@ -68,10 +78,26 @@ var ExportProportionsComponent = (function () {
         }, function (error) { return _this.errorMessage = error; });
     };
     ExportProportionsComponent.prototype.processData = function (data) {
-        this.chartList.addChart(this.mainPieChartData, this.title, this.totalVal);
+        //this.chartList.addChart(this.mainPieChartData, this.title, this.totalVal, this.route.snapshot.params['url']);
+        var _this = this;
+        if (data.url_history != undefined) {
+            this.chartList.clearLength(data.url_history.length);
+            var _loop_1 = function (i) {
+                this_1.exportPropService.getPropData(data.url_history[i])
+                    .subscribe(function (histData) { return _this.processHistoryData(histData, i, data.url_history[i]); }, function (error) { return _this.processError(error); });
+            };
+            var this_1 = this;
+            for (var i = 0; i < data.url_history.length; i++) {
+                _loop_1(i);
+            }
+        }
         this.mainPieChartData = data.data;
         this.title = data.title;
         this.totalVal = data.total;
+    };
+    ExportProportionsComponent.prototype.processHistoryData = function (data, index, url) {
+        console.log("processing: " + url);
+        this.chartList.addChartAt(data.data, data.title, data.total, url, index);
     };
     ExportProportionsComponent.prototype.processError = function (error) {
         var _this = this;
@@ -81,15 +107,13 @@ var ExportProportionsComponent = (function () {
         this.mainPieChartData = chart.chartData;
         this.title = chart.title;
         this.totalVal = chart.total;
+        this.router.navigate(["proportions", chart.url]);
     };
     ExportProportionsComponent.prototype.onMainChartSelected = function (selected) {
-        var _this = this;
         if (selected[0]) {
             var url = this.mainPieChartData[selected[0].row + 1][4];
             if (url != '') {
-                this.router.navigate(["proportions", this.currentYear, url]);
-                this.exportPropService.getPropData(url)
-                    .subscribe(function (data) { return _this.processData(data); }, function (error) { return _this.processError(error); });
+                this.router.navigate(["proportions", url]);
             }
         }
     };

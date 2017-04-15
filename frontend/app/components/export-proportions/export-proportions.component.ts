@@ -21,6 +21,7 @@ export class ExportProportionsComponent {
   private grandTotalVal: number;
   private currentYear: string;
   private routeEventID: number;
+  private currentURL: string;
 
   constructor(private exportPropService: ExportProportionService,
     private exportYearsService: ExportYearsService,
@@ -31,19 +32,25 @@ export class ExportProportionsComponent {
     this.currentYear = '2016';
 
     router.events.subscribe((event: NavigationEnd) => {
-      if(this.route.snapshot.params['year'] != this.currentYear){
+      console.log("event");
+      if(this.route.snapshot.params['url'] != this.currentURL){
+        console.log("url change");
+        this.currentURL = this.route.snapshot.params['url'];
         this.redrawOnNavigation();
-        console.log('navigation triggered');
-        console.log(this.route.snapshot.params);
       }
     });
   }
 
   onYearSliderChange(event){
     if(event.value != this.currentYear){
-      console.log('slider event triggered');
-      this.chartList.clear();
-      this.router.navigate(['proportions', event.value]);
+      let yearIndex = this.currentURL.indexOf("year=");
+      let newURL = this.currentURL.substr(0, yearIndex + 5);
+      newURL += event.value;
+      newURL += this.currentURL.substr(yearIndex + 9);
+      //console.log('slider event triggered');
+      //this.chartList.clear();
+      //this.router.navigate(['proportions', event.value]);
+      this.router.navigate(["proportions", newURL]);
     }
   }
 
@@ -54,10 +61,16 @@ export class ExportProportionsComponent {
   }
 
   redrawOnNavigation(){
-    if(this.route.snapshot.params['year'])
-      this.currentYear = this.route.snapshot.params['year'];
-    console.log('redrawing with ' + this.currentYear );
-    this.getHS2Data();
+    if(this.route.snapshot.params['url']){
+      this.exportPropService.getPropData(this.route.snapshot.params['url'])
+      .subscribe(
+        data => this.processData(data),
+        error => this.processError(error)
+      );
+    }
+    else{
+      this.router.navigate(["proportions", "ExportProportions?year=2016&offset=1&max=10&level=2"])
+    }
   }
 
   getYearData(){
@@ -83,10 +96,28 @@ export class ExportProportionsComponent {
   }
 
   processData(data) {
-    this.chartList.addChart(this.mainPieChartData, this.title, this.totalVal);
-      this.mainPieChartData = data.data;
-      this.title = data.title;
-      this.totalVal = data.total;
+    //this.chartList.addChart(this.mainPieChartData, this.title, this.totalVal, this.route.snapshot.params['url']);
+
+    if(data.url_history != undefined){
+      this.chartList.clearLength(data.url_history.length);
+
+      for(let i = 0; i < data.url_history.length; i++){
+        this.exportPropService.getPropData(data.url_history[i])
+        .subscribe(
+          histData => this.processHistoryData(histData, i, data.url_history[i]),
+          error => this.processError(error)
+        );
+      }
+    }
+
+    this.mainPieChartData = data.data;
+    this.title = data.title;
+    this.totalVal = data.total;
+  }
+
+  processHistoryData(data, index, url){
+    console.log("processing: " + url);
+    this.chartList.addChartAt(data.data, data.title, data.total, url, index);
   }
 
   processError(error){
@@ -97,18 +128,14 @@ export class ExportProportionsComponent {
       this.mainPieChartData = chart.chartData;
       this.title = chart.title;
       this.totalVal = chart.total;
+      this.router.navigate(["proportions", chart.url]);
   }
 
   onMainChartSelected(selected){
       if(selected[0]){
         let url = this.mainPieChartData[selected[0].row + 1][4];
         if(url != ''){
-          this.router.navigate(["proportions", this.currentYear, url])
-          this.exportPropService.getPropData(url)
-          .subscribe(
-            data => this.processData(data),
-            error => this.processError(error)
-          );
+          this.router.navigate(["proportions", url]);
         }
       }
   }

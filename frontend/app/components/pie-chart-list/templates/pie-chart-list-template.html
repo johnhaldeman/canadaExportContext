@@ -1,17 +1,19 @@
 <row>
   <div class='col-xs-3' *ngFor="let chart of charts; let chartIndex = index, let isFirst = first">
-    <row>
-      <div class='col-xs-12 ellipsis'>
-        <button (click)="focusChart(chartIndex)" type="button" class="btn btn-link ellipsis"> <span class="ellipsis">{{chart.title}}</span> </button>
-      </div>
-    </row>
-    <row>
-      <div class="col-xs-1 vcenter">
-        <h3><span *ngIf="!isFirst" class="glyphicon glyphicon-menu-right"></span></h3>
-      </div>
-      <div class='col-xs-10 vcenter'>
-        <div GoogleChart [id]="chart.id" [chartData]="chart.chartData" [chartOptions]="chart.chartOptions" [chartType]="chart.chartType"></div>
-      </div>
-    </row>
+    <div *ngIf="chart != undefined">
+      <row>
+        <div class='col-xs-12 ellipsis'>
+          <button (click)="focusChart(chartIndex)" type="button" class="btn btn-link ellipsis"> <span class="ellipsis">{{chart.title}}</span> </button>
+        </div>
+      </row>
+      <row>
+        <div class="col-xs-1 vcenter">
+          <h3><span *ngIf="!isFirst" class="glyphicon glyphicon-menu-right"></span></h3>
+        </div>
+        <div class='col-xs-10 vcenter'>
+            <div GoogleChart [id]="chart.id" [chartData]="chart.chartData" [chartOptions]="chart.chartOptions" [chartType]="chart.chartType"></div>
+          </div>
+      </row>
+    </div>
   </div>
 </row>

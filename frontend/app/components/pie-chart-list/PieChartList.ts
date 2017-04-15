@@ -20,12 +20,13 @@ export class PieChartList{
     this.charts = this.charts.slice(0, index);
   }
 
-  public addChart(chartData: Object[], chartTitle: string, total: number){
+  private buildNewChartDef(chartData: Object[], chartTitle: string, total: number, url: string, id: number){
     let chartDef = new ChartDefinition();
     chartDef.title = chartTitle;
     chartDef.total = total;
     chartDef.chartType = 'PieChart';
-    chartDef.id = "littlePieChart" + this.charts.length;
+    chartDef.id = "littlePieChart" + id;
+    chartDef.url = url;
     chartDef.chartOptions =  {
       height: window.innerHeight / 7,
       chartArea:{width:"95%",height:"95%"},
@@ -35,10 +36,20 @@ export class PieChartList{
     chartDef.chartData = chartData;
     chartDef.titleVisible = false;
 
-    this.charts.push(chartDef);
+    return chartDef;
   }
+
+  public addChartAt(chartData: Object[], chartTitle: string, total: number, url: string, at: number){
+    let chartDef = this.buildNewChartDef(chartData, chartTitle, total, url, at);
+    this.charts[at] = chartDef;
+  }
+
 
   public clear(){
     this.charts = new Array<ChartDefinition>();
+  }
+
+  public clearLength(length: number){
+    this.charts = new  Array<ChartDefinition>();
   }
 }

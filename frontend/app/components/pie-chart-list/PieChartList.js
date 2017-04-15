@@ -21,12 +21,13 @@ var PieChartList = (function () {
         this.onChartFocus.emit(this.charts[index]);
         this.charts = this.charts.slice(0, index);
     };
-    PieChartList.prototype.addChart = function (chartData, chartTitle, total) {
+    PieChartList.prototype.buildNewChartDef = function (chartData, chartTitle, total, url, id) {
         var chartDef = new ChartDefinition_1.ChartDefinition();
         chartDef.title = chartTitle;
         chartDef.total = total;
         chartDef.chartType = 'PieChart';
-        chartDef.id = "littlePieChart" + this.charts.length;
+        chartDef.id = "littlePieChart" + id;
+        chartDef.url = url;
         chartDef.chartOptions = {
             height: window.innerHeight / 7,
             chartArea: { width: "95%", height: "95%" },
@@ -35,9 +36,16 @@ var PieChartList = (function () {
         };
         chartDef.chartData = chartData;
         chartDef.titleVisible = false;
-        this.charts.push(chartDef);
+        return chartDef;
+    };
+    PieChartList.prototype.addChartAt = function (chartData, chartTitle, total, url, at) {
+        var chartDef = this.buildNewChartDef(chartData, chartTitle, total, url, at);
+        this.charts[at] = chartDef;
     };
     PieChartList.prototype.clear = function () {
+        this.charts = new Array();
+    };
+    PieChartList.prototype.clearLength = function (length) {
         this.charts = new Array();
     };
     return PieChartList;

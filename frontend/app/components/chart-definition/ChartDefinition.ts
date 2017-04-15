@@ -9,4 +9,5 @@ export class ChartDefinition{
   public titleVisible: boolean;
   public title: string;
   public total: number;
+  public url: string;
 }
