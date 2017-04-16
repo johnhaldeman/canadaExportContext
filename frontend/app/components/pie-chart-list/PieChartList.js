@@ -45,9 +45,6 @@ var PieChartList = (function () {
     PieChartList.prototype.clear = function () {
         this.charts = new Array();
     };
-    PieChartList.prototype.clearLength = function (length) {
-        this.charts = new Array();
-    };
     return PieChartList;
 }());
 __decorate([

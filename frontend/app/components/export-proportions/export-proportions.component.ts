@@ -34,8 +34,8 @@ export class ExportProportionsComponent {
     router.events.subscribe((event: NavigationEnd) => {
       console.log("event");
       if(this.route.snapshot.params['url'] != this.currentURL){
-        console.log("url change");
         this.currentURL = this.route.snapshot.params['url'];
+        this.chartList.clear();
         this.redrawOnNavigation();
       }
     });
@@ -99,7 +99,7 @@ export class ExportProportionsComponent {
     //this.chartList.addChart(this.mainPieChartData, this.title, this.totalVal, this.route.snapshot.params['url']);
 
     if(data.url_history != undefined){
-      this.chartList.clearLength(data.url_history.length);
+      this.chartList.clear();
 
       for(let i = 0; i < data.url_history.length; i++){
         this.exportPropService.getPropData(data.url_history[i])

@@ -49,7 +49,4 @@ export class PieChartList{
     this.charts = new Array<ChartDefinition>();
   }
 
-  public clearLength(length: number){
-    this.charts = new  Array<ChartDefinition>();
-  }
 }

@@ -28,8 +28,8 @@ var ExportProportionsComponent = (function () {
         router.events.subscribe(function (event) {
             console.log("event");
             if (_this.route.snapshot.params['url'] != _this.currentURL) {
-                console.log("url change");
                 _this.currentURL = _this.route.snapshot.params['url'];
+                _this.chartList.clear();
                 _this.redrawOnNavigation();
             }
         });
@@ -81,7 +81,7 @@ var ExportProportionsComponent = (function () {
         //this.chartList.addChart(this.mainPieChartData, this.title, this.totalVal, this.route.snapshot.params['url']);
         var _this = this;
         if (data.url_history != undefined) {
-            this.chartList.clearLength(data.url_history.length);
+            this.chartList.clear();
             var _loop_1 = function (i) {
                 this_1.exportPropService.getPropData(data.url_history[i])
                     .subscribe(function (histData) { return _this.processHistoryData(histData, i, data.url_history[i]); }, function (error) { return _this.processError(error); });
