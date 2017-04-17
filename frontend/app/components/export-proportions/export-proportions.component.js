@@ -29,7 +29,6 @@ var ExportProportionsComponent = (function () {
             console.log("event");
             if (_this.route.snapshot.params['url'] != _this.currentURL) {
                 _this.currentURL = _this.route.snapshot.params['url'];
-                _this.chartList.clear();
                 _this.redrawOnNavigation();
             }
         });
@@ -40,9 +39,6 @@ var ExportProportionsComponent = (function () {
             var newURL = this.currentURL.substr(0, yearIndex + 5);
             newURL += event.value;
             newURL += this.currentURL.substr(yearIndex + 9);
-            //console.log('slider event triggered');
-            //this.chartList.clear();
-            //this.router.navigate(['proportions', event.value]);
             this.router.navigate(["proportions", newURL]);
         }
     };
@@ -81,15 +77,20 @@ var ExportProportionsComponent = (function () {
         //this.chartList.addChart(this.mainPieChartData, this.title, this.totalVal, this.route.snapshot.params['url']);
         var _this = this;
         if (data.url_history != undefined) {
-            this.chartList.clear();
+            this.chartList.chopList(data.url_history.length);
             var _loop_1 = function (i) {
-                this_1.exportPropService.getPropData(data.url_history[i])
-                    .subscribe(function (histData) { return _this.processHistoryData(histData, i, data.url_history[i]); }, function (error) { return _this.processError(error); });
+                if (!this_1.chartList.isLoaded(i, data.url_history[i])) {
+                    this_1.exportPropService.getPropData(data.url_history[i])
+                        .subscribe(function (histData) { return _this.processHistoryData(histData, i, data.url_history[i]); }, function (error) { return _this.processError(error); });
+                }
             };
             var this_1 = this;
             for (var i = 0; i < data.url_history.length; i++) {
                 _loop_1(i);
             }
+        }
+        else {
+            this.chartList.clear();
         }
         this.mainPieChartData = data.data;
         this.title = data.title;

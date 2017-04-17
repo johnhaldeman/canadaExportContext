@@ -35,7 +35,6 @@ export class ExportProportionsComponent {
       console.log("event");
       if(this.route.snapshot.params['url'] != this.currentURL){
         this.currentURL = this.route.snapshot.params['url'];
-        this.chartList.clear();
         this.redrawOnNavigation();
       }
     });
@@ -47,9 +46,6 @@ export class ExportProportionsComponent {
       let newURL = this.currentURL.substr(0, yearIndex + 5);
       newURL += event.value;
       newURL += this.currentURL.substr(yearIndex + 9);
-      //console.log('slider event triggered');
-      //this.chartList.clear();
-      //this.router.navigate(['proportions', event.value]);
       this.router.navigate(["proportions", newURL]);
     }
   }
@@ -99,15 +95,20 @@ export class ExportProportionsComponent {
     //this.chartList.addChart(this.mainPieChartData, this.title, this.totalVal, this.route.snapshot.params['url']);
 
     if(data.url_history != undefined){
-      this.chartList.clear();
+      this.chartList.chopList(data.url_history.length);
 
       for(let i = 0; i < data.url_history.length; i++){
-        this.exportPropService.getPropData(data.url_history[i])
-        .subscribe(
-          histData => this.processHistoryData(histData, i, data.url_history[i]),
-          error => this.processError(error)
-        );
+        if(!this.chartList.isLoaded(i, data.url_history[i])){
+          this.exportPropService.getPropData(data.url_history[i])
+          .subscribe(
+            histData => this.processHistoryData(histData, i, data.url_history[i]),
+            error => this.processError(error)
+          );
+        }
       }
+    }
+    else{
+      this.chartList.clear();
     }
 
     this.mainPieChartData = data.data;

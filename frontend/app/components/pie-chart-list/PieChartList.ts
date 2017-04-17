@@ -44,6 +44,18 @@ export class PieChartList{
     this.charts[at] = chartDef;
   }
 
+  public isLoaded(index: number, url: string){
+    if(this.charts[index] === undefined || this.charts[index] === null){
+      return false;
+    }
+    else{
+      return this.charts[index].url == url;
+    }
+  }
+
+  public chopList(size: number){
+    this.charts.splice(size);
+  }
 
   public clear(){
     this.charts = new Array<ChartDefinition>();

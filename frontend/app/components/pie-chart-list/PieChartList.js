@@ -42,6 +42,17 @@ var PieChartList = (function () {
         var chartDef = this.buildNewChartDef(chartData, chartTitle, total, url, at);
         this.charts[at] = chartDef;
     };
+    PieChartList.prototype.isLoaded = function (index, url) {
+        if (this.charts[index] === undefined || this.charts[index] === null) {
+            return false;
+        }
+        else {
+            return this.charts[index].url == url;
+        }
+    };
+    PieChartList.prototype.chopList = function (size) {
+        this.charts.splice(size);
+    };
     PieChartList.prototype.clear = function () {
         this.charts = new Array();
     };
