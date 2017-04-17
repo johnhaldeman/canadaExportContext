@@ -35,6 +35,10 @@ export class ExportProportionsComponent {
       console.log("event");
       if(this.route.snapshot.params['url'] != this.currentURL){
         this.currentURL = this.route.snapshot.params['url'];
+
+        let yearIndex = this.currentURL.indexOf("year=");
+        this.currentYear = this.currentURL.substr(yearIndex + 5, 4);
+
         this.redrawOnNavigation();
       }
     });
@@ -42,6 +46,7 @@ export class ExportProportionsComponent {
 
   onYearSliderChange(event){
     if(event.value != this.currentYear){
+      this.currentYear = event.value;
       let yearIndex = this.currentURL.indexOf("year=");
       let newURL = this.currentURL.substr(0, yearIndex + 5);
       newURL += event.value;

@@ -29,12 +29,15 @@ var ExportProportionsComponent = (function () {
             console.log("event");
             if (_this.route.snapshot.params['url'] != _this.currentURL) {
                 _this.currentURL = _this.route.snapshot.params['url'];
+                var yearIndex = _this.currentURL.indexOf("year=");
+                _this.currentYear = _this.currentURL.substr(yearIndex + 5, 4);
                 _this.redrawOnNavigation();
             }
         });
     }
     ExportProportionsComponent.prototype.onYearSliderChange = function (event) {
         if (event.value != this.currentYear) {
+            this.currentYear = event.value;
             var yearIndex = this.currentURL.indexOf("year=");
             var newURL = this.currentURL.substr(0, yearIndex + 5);
             newURL += event.value;
