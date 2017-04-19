@@ -97,7 +97,6 @@ export class ExportProportionsComponent {
   }
 
   processData(data) {
-    //this.chartList.addChart(this.mainPieChartData, this.title, this.totalVal, this.route.snapshot.params['url']);
 
     if(data.url_history != undefined){
       this.chartList.chopList(data.url_history.length);
@@ -110,10 +109,14 @@ export class ExportProportionsComponent {
             error => this.processError(error)
           );
         }
+        else if(i == 0){
+          this.grandTotalVal = this.chartList.charts[i].total;
+        }
       }
     }
     else{
       this.chartList.clear();
+      this.grandTotalVal = data.total;
     }
 
     this.mainPieChartData = data.data;

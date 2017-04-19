@@ -77,7 +77,6 @@ var ExportProportionsComponent = (function () {
         }, function (error) { return _this.errorMessage = error; });
     };
     ExportProportionsComponent.prototype.processData = function (data) {
-        //this.chartList.addChart(this.mainPieChartData, this.title, this.totalVal, this.route.snapshot.params['url']);
         var _this = this;
         if (data.url_history != undefined) {
             this.chartList.chopList(data.url_history.length);
@@ -85,6 +84,9 @@ var ExportProportionsComponent = (function () {
                 if (!this_1.chartList.isLoaded(i, data.url_history[i])) {
                     this_1.exportPropService.getPropData(data.url_history[i])
                         .subscribe(function (histData) { return _this.processHistoryData(histData, i, data.url_history[i]); }, function (error) { return _this.processError(error); });
+                }
+                else if (i == 0) {
+                    this_1.grandTotalVal = this_1.chartList.charts[i].total;
                 }
             };
             var this_1 = this;
@@ -94,6 +96,7 @@ var ExportProportionsComponent = (function () {
         }
         else {
             this.chartList.clear();
+            this.grandTotalVal = data.total;
         }
         this.mainPieChartData = data.data;
         this.title = data.title;
