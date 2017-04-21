@@ -66,9 +66,13 @@ public class ExportProportions extends HttpServlet {
     	
     }
     
-    public String getDrillDownURI(String desc, String origDesc, String level, int max, int year) throws UnsupportedEncodingException{
+    public String getDrillDownURI(String desc, String origDesc, String level, int max, int year, int country) throws UnsupportedEncodingException{
     	String linkLevel = "2";
     	String newDesc = "";
+    	String postFix = "";
+    	if(country != -1){
+    		postFix = "&country=" + country;
+    	}
     	
     	if(desc.equals("Other")){
     		linkLevel = level;
@@ -76,10 +80,10 @@ public class ExportProportions extends HttpServlet {
         	int newMax = newOffset + 9;
         	if(origDesc != null){
         		newDesc=URLEncoder.encode(origDesc, "UTF-8");
-        		return "ExportProportions?year="+year+"&offset="+ newOffset +"&max=" + newMax + "&level="+linkLevel+"&query=" + newDesc;
+        		return "ExportProportions?year="+year+"&offset="+ newOffset +"&max=" + newMax + "&level="+linkLevel+"&query=" + newDesc + postFix;
         	}
         	else
-        		return "ExportProportions?year="+year+"&offset="+ newOffset +"&max=" + newMax + "&level="+linkLevel;
+        		return "ExportProportions?year="+year+"&offset="+ newOffset +"&max=" + newMax + "&level="+linkLevel + postFix;
     	}
     	else{
     		if(level.equals("6")){
@@ -90,10 +94,172 @@ public class ExportProportions extends HttpServlet {
         		linkLevel = "4";
         	else if(level.equals("4"))
         		linkLevel = "6";
-    		return "ExportProportions?year="+year+"&offset=0&max=10&level="+linkLevel+"&query=" + newDesc;
+    		return "ExportProportions?year="+year+"&offset=0&max=10&level="+linkLevel+"&query=" + newDesc + postFix;
     	}
     	
     }
+    
+	private PreparedStatement getMainStatement(Connection conn, int year, int offset, int max, String level,
+			String query, int country) throws SQLException {
+		final String hs2Select = 	
+				"WITH EXP_COUNTRY AS (\n " +
+				"        SELECT \n " +
+				"        CL.HS_2_DESC, \n " +
+				"        SUM(VALUE) AS VALUE, \n " +
+				"        ED.year \n " +
+				"        FROM EXPORT_DATA ED, CODE_LOOKUP CL \n " +
+				"        WHERE ED.HS_CODE = CL.CODE \n " +
+				"        AND GEO = 1 \n " +
+				"        AND STATE = 1000 \n " +
+				"        AND COUNTRY = ? \n " +
+				"        GROUP BY CL.HS_2_DESC, ED.year, ED.month \n " +
+				"), \n " +
+				"summary AS ( \n " +
+				"    SELECT p.*, ROW_NUMBER() OVER (ORDER BY p.value DESC) AS rank \n " +
+				"    FROM ( \n " +
+				"        SELECT HS_2_DESC as desc, SUM(VALUE) AS value \n " +
+				"	 FROM EXP_COUNTRY \n " +
+				"        WHERE YEAR = ? \n " +
+				"        GROUP BY HS_2_DESC \n " +
+				"    ) p \n " +
+				"), \n " +
+				"total AS ( \n " +
+				"    SELECT SUM(VALUE) as value \n " +
+				"    FROM EXP_COUNTRY \n " +
+				"    WHERE YEAR = ? \n " +
+				") \n " +
+				"  SELECT s1.desc, s1.value, s1.value/t1.value as percent, s1.rank \n " +
+				"  FROM summary s1, total t1 \n " +
+				"  WHERE s1.rank <= ? and s1.rank >= ? \n " +
+				"UNION ALL \n " +
+				"  SELECT 'Other', SUM(s2.value), SUM(s2.value)/t2.value as percent, ? + 1 \n " +
+				"    FROM summary s2, total t2 \n " +
+				"   WHERE s2.rank > ? \n " +
+				"  GROUP BY t2.value \n " +
+				"ORDER BY rank \n ";
+		
+		final String hs4Select =
+				"WITH EXP_COUNTRY AS (\n " +
+				"        SELECT \n " +
+				"        CL.HS_4_DESC, \n " +
+				"        CL.HS_2_DESC, \n " +
+				"        SUM(VALUE) AS VALUE, \n " +
+				"        ED.year \n " +
+				"        FROM EXPORT_DATA ED, CODE_LOOKUP CL \n " +
+				"        WHERE ED.HS_CODE = CL.CODE \n " +
+				"        AND GEO = 1 \n " +
+				"        AND STATE = 1000 \n " +
+				"        AND COUNTRY = ? \n " +
+				"        GROUP BY CL.HS_4_DESC, CL.HS_2_DESC, ED.year, ED.month \n " +
+				"), \n " +
+				"summary AS ( \n" +
+				"    SELECT p.*, ROW_NUMBER() OVER (ORDER BY p.value DESC) AS rank\n" +
+				"    FROM (\n" +
+				"        SELECT HS_4_DESC as desc, SUM(VALUE) AS value\n" +
+				"	 FROM EXP_COUNTRY\n" +
+				"        WHERE YEAR = ?\n" +
+				"        AND HS_2_DESC=?\n" +
+				"        GROUP BY HS_4_DESC\n" +
+				"    ) p\n" +
+				"),\n" +
+				"total AS(\n" +
+				"    SELECT SUM(VALUE) as value\n" +
+				"    FROM EXP_COUNTRY\n" +
+				"    WHERE YEAR = ?\n" +
+				"    AND HS_2_DESC=?\n" +
+				")\n" +
+				"  SELECT s1.desc, s1.value, s1.value/t1.value as percent, s1.rank\n" +
+				"  FROM summary s1, total t1\n" +
+				"  WHERE s1.rank <= ? and s1.rank >= ?\n" +
+				"UNION ALL\n" +
+				"  SELECT 'Other', SUM(s2.value), SUM(s2.value)/t2.value as percent, ? + 1\n" +
+				"    FROM summary s2, total t2\n" +
+				"   WHERE s2.rank > ?\n" +
+				"  GROUP BY t2.value\n" +
+				"ORDER BY rank ";
+		
+		final String hs6Select = 	
+				"WITH EXP_COUNTRY AS (\n " +
+				"        SELECT \n " +
+				"        CL.HS_4_DESC, \n " +
+				"        CL.english_description as HS_6_DESC, \n " +
+				"        SUM(VALUE) AS VALUE, \n " +
+				"        ED.year \n " +
+				"        FROM EXPORT_DATA ED, CODE_LOOKUP CL \n " +
+				"        WHERE ED.HS_CODE = CL.CODE \n " +
+				"        AND GEO = 1 \n " +
+				"        AND STATE = 1000 \n " +
+				"        AND COUNTRY = ? \n " +
+				"        GROUP BY CL.HS_4_DESC, CL.english_description, ED.year, ED.month \n " +
+				"), \n " +
+				"summary AS ( \n" +
+				"    SELECT p.*, ROW_NUMBER() OVER (ORDER BY p.value DESC) AS rank\n" +
+				"    FROM (\n" +
+				"        SELECT HS_6_DESC as desc, SUM(VALUE) AS value\n" +
+				"	 FROM EXP_COUNTRY\n" +
+				"        WHERE YEAR = ?\n" +
+				"        AND HS_4_DESC=?\n" +
+				"        GROUP BY HS_6_DESC\n" +
+				"    ) p\n" +
+				"),\n" +
+				"total AS(\n" +
+				"    SELECT SUM(VALUE) as value\n" +
+				"    FROM EXP_COUNTRY\n" +
+				"    WHERE YEAR = ?\n" +
+				"    AND HS_4_DESC=?\n" +
+				")\n" +
+				"  SELECT s1.desc, s1.value, s1.value/t1.value as percent, s1.rank\n" +
+				"  FROM summary s1, total t1\n" +
+				"  WHERE s1.rank <= ? and s1.rank >= ?\n" +
+				"UNION ALL\n" +
+				"  SELECT 'Other', SUM(s2.value), SUM(s2.value)/t2.value as percent, ? + 1\n" +
+				"    FROM summary s2, total t2\n" +
+				"   WHERE s2.rank > ?\n" +
+				"  GROUP BY t2.value\n" +
+				"ORDER BY rank ";
+		
+		PreparedStatement stmt;
+		
+		if(level.equals("6")){
+			stmt = conn.prepareStatement(hs6Select);
+
+			stmt.setInt(1, country);
+			stmt.setInt(2, year);
+			stmt.setString(3, query);
+			stmt.setInt(4, year);
+			stmt.setString(5, query);
+			stmt.setInt(6, max);
+			stmt.setInt(7, offset);
+			stmt.setInt(8, max);
+			stmt.setInt(9, max);
+			
+		}
+		else if(level.equals("4")){
+			stmt = conn.prepareStatement(hs4Select);
+
+			stmt.setInt(1, country);
+			stmt.setInt(2, year);
+			stmt.setString(3, query);
+			stmt.setInt(4, year);
+			stmt.setString(5, query);
+			stmt.setInt(6, max);
+			stmt.setInt(7, offset);
+			stmt.setInt(8, max);
+			stmt.setInt(9, max);
+		}
+		else{
+			stmt = conn.prepareStatement(hs2Select);
+			
+			stmt.setInt(1, country);
+			stmt.setInt(2, year);
+			stmt.setInt(3, year);
+			stmt.setInt(4, max);
+			stmt.setInt(5, offset);
+			stmt.setInt(6, max);
+			stmt.setInt(7, max);				
+		}
+		return stmt;
+	}
 
 	private PreparedStatement getMainStatement(Connection conn, int year, int offset, int max, String level,
 			String query) throws SQLException {
@@ -221,7 +387,7 @@ public class ExportProportions extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
-		response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+		//response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
 		response.setContentType("application/json");
 		
 		InitialContext cxt;
@@ -265,9 +431,14 @@ public class ExportProportions extends HttpServlet {
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				return;
 			}
-			
-			
-			PreparedStatement stmt = getMainStatement(conn, year, offset, max, level, query);
+			int country = -1;
+			PreparedStatement stmt;
+			if(request.getParameter("country") == null)
+				stmt = getMainStatement(conn, year, offset, max, level, query);
+			else{
+				country = Integer.parseInt(request.getParameter("country"));
+				stmt = getMainStatement(conn, year, offset, max, level, query, country);
+			}
 			
 			ResultSet rs = stmt.executeQuery();
 					
@@ -289,7 +460,7 @@ public class ExportProportions extends HttpServlet {
 				
 				Object[] data = new Object[md.getColumnCount() + 1];
 				String desc = rs.getString("desc");				
-				String drillURI = getDrillDownURI(desc, query, level, max, year);
+				String drillURI = getDrillDownURI(desc, query, level, max, year, country);
 				data[data.length - 1] = drillURI;
 				
 				for(int i = 1; i <= md.getColumnCount(); i++){
