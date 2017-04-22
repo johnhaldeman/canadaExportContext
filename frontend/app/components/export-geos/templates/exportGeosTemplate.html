@@ -25,7 +25,7 @@
       <md-slider (input)="onYearSliderChange($event)" style="width: 400px" min="2012" max="2017" step="1" value="2015" tick-interval="1" thumbLabel="true"></md-slider>
 
       <br/><br/>
-      <div GoogleChart [test]="test" [id]="id" [chartData]="data" [chartOptions]="chartOptions" [chartType]="chartType"></div>
+      <div GoogleChart [test]="test" [id]="id" [chartData]="data" [chartOptions]="chartOptions" [chartType]="chartType" (onSelected)="onCountrySelected($event)"></div>
       <br/><br/>
     </div>
     <div class='offset-xs-1 col-xs-10'>

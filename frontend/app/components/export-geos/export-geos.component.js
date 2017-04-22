@@ -12,10 +12,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
 var export_geos_service_1 = require("../../services/export_geos.service");
 var export_years_service_1 = require("../../services/export_years.service");
+var router_1 = require("@angular/router");
 var ExportGeosComponent = (function () {
-    function ExportGeosComponent(exportPropService, exportYearsService) {
+    function ExportGeosComponent(exportPropService, exportYearsService, router) {
         this.exportPropService = exportPropService;
         this.exportYearsService = exportYearsService;
+        this.router = router;
         this.regions = [
             ["world", "World", "countries"],
             ["US", "US", "provinces"],
@@ -70,6 +72,7 @@ var ExportGeosComponent = (function () {
             _this.total = geoData.total;
             _this.grand_total = geoData.grand_total;
             _this.test = geoData.total + "";
+            _this.ids = geoData.ids;
         }, function (error) { return _this.errorMessage = error; });
     };
     ExportGeosComponent.prototype.includeUSChanged = function (event) {
@@ -96,6 +99,10 @@ var ExportGeosComponent = (function () {
             this.getGeoData();
         }
     };
+    ExportGeosComponent.prototype.onCountrySelected = function (event) {
+        var row = event[0].row;
+        this.router.navigate(["proportions", "ExportProportions?year=" + this.year + "&offset=1&max=10&level=2&country=" + this.ids[row]]);
+    };
     return ExportGeosComponent;
 }());
 ExportGeosComponent = __decorate([
@@ -103,7 +110,8 @@ ExportGeosComponent = __decorate([
         templateUrl: '/app/components/export-geos/templates/exportGeosTemplate.html'
     }),
     __metadata("design:paramtypes", [export_geos_service_1.ExportGeoService,
-        export_years_service_1.ExportYearsService])
+        export_years_service_1.ExportYearsService,
+        router_1.Router])
 ], ExportGeosComponent);
 exports.ExportGeosComponent = ExportGeosComponent;
 //# sourceMappingURL=export-geos.component.js.map

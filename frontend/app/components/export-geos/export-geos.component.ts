@@ -2,6 +2,7 @@ import {Component, ViewChild} from '@angular/core';
 import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
 import {ExportGeoService} from '../../services/export_geos.service'
 import {ExportYearsService} from '../../services/export_years.service'
+import {Router } from '@angular/router';
 declare var google:any;
 declare var googleLoaded:any;
 
@@ -27,9 +28,11 @@ export class ExportGeosComponent {
     private territory: string;
     public include_us: boolean;
     private errorMessage: string;
+    private ids: number[];
 
     constructor(private exportPropService: ExportGeoService,
-      private exportYearsService: ExportYearsService) {
+      private exportYearsService: ExportYearsService,
+      private router: Router) {
 
       this.include_us = true;
       this.territory = 'World';
@@ -62,6 +65,7 @@ export class ExportGeosComponent {
           this.total = geoData.total;
           this.grand_total = geoData.grand_total;
           this.test = geoData.total + "";
+          this.ids = geoData.ids;
         },
         error =>  this.errorMessage = <any>error);
     }
@@ -95,6 +99,10 @@ export class ExportGeosComponent {
       }
     }
 
+    onCountrySelected(event){
+      let row = event[0].row;
+      this.router.navigate(["proportions", "ExportProportions?year=" + this.year + "&offset=1&max=10&level=2&country=" + this.ids[row]]);
+    }
 
     private test = "";
     private chartOptions = {displayMode: 'regions'

@@ -8,6 +8,7 @@ export class ExportGeoData{
   data: Object[];
   total: number;
   grand_total: number;
+  ids: number[];
 }
 
 @Injectable()

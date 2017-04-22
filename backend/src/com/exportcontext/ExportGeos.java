@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.Vector;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -73,24 +74,24 @@ public class ExportGeos extends HttpServlet {
 			PreparedStatement stmt;
 			if(territory.equals("World")){
 				if(includeUS)
-					sql = "select country_code, value, country_label || ': $' || to_char((value /1000000), '999,999,999') || ' million' " //, year, territory_text "
+					sql = "select country_code, value, country_label || ': $' || to_char((value /1000000), '999,999,999') || ' million' as value_text, country_id " //, year, territory_text "
 							+ "from geo_world_precomp "
 							+ "where year = ?";
 				else
-					sql = "select country_code, value, country_label || ': $' || to_char((value /1000000), '999,999,999') || ' million'  " //, year, territory_text "
+					sql = "select country_code, value, country_label || ': $' || to_char((value /1000000), '999,999,999') || ' million'  as value_text, country_id " //, year, territory_text "
 							+ "from geo_world_precomp "
 							+ "where year = ? "
 							+ "and country_code <> 'US'";
 				stmt = conn.prepareStatement(sql);
 			}
 			else if(territory.equals("US")){
-				sql = "select state_code, value, state_label || ': $' || to_char((value /1000000), '999,999,999') || ' million'  " //, year, territory_text "
+				sql = "select state_code, value, state_label || ': $' || to_char((value /1000000), '999,999,999') || ' million'  as value_text, 0 " //, year, territory_text "
 						+ "from geo_us_precomp "
 						+ "where year = ?";
 				stmt = conn.prepareStatement(sql);
 			}
 			else{
-				sql = "select country_code, value, country_label  || ': $' || to_char((value /1000000), '999,999,999') || ' million'  " //, year, territory_text "
+				sql = "select country_code, value, country_label  || ': $' || to_char((value /1000000), '999,999,999') || ' million'  as value_text, country_id " //, year, territory_text "
 						+ "from geo_world_precomp "
 						+ "where year = ? "
 						+ "and territory_text = ?";
@@ -112,23 +113,25 @@ public class ExportGeos extends HttpServlet {
 			wr.println("{\n\"data\": [");
 			wr.print(gson.toJson(collHeader));
 			
+			Vector<Integer> ids = new Vector<Integer>();
+						
 			long totalVal = 0; 
 			while(rs.next()){
 				wr.println(",");
-				Object[] data = new Object[md.getColumnCount()];
-				for(int i = 1; i <= md.getColumnCount(); i++){
+				Object[] data = new Object[md.getColumnCount() - 1];
+				for(int i = 1; i <= data.length; i++){
 					if(rs.getObject(i) == null)
 						data[i - 1] = rs.getObject(i);
 					else if(rs.getObject(i).getClass() == String.class)
 						data[i - 1] = rs.getObject(i).toString().trim();
 					else
 						data[i - 1] = rs.getObject(i);
-					
-					
 				}
 				
 				totalVal += rs.getLong("value");
 				wr.print(gson.toJson(data));
+				
+				ids.add(rs.getInt("country_id"));
 			}
 			wr.println("], \n\"total\": " + totalVal );
 			stmt.close();
@@ -142,6 +145,8 @@ public class ExportGeos extends HttpServlet {
 			grandTotalResult.next();
 			wr.println(", \"grand_total\": " + grandTotalResult.getLong("value") );
 		
+			wr.println(", \"ids\": " + gson.toJson(ids));
+			
 			wr.println("}");
 			
 			rs.close();
