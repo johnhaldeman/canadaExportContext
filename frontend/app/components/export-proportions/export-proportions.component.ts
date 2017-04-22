@@ -22,6 +22,7 @@ export class ExportProportionsComponent {
   private currentYear: string;
   private routeEventID: number;
   private currentURL: string;
+  private country: string;
 
   constructor(private exportPropService: ExportProportionService,
     private exportYearsService: ExportYearsService,
@@ -30,6 +31,7 @@ export class ExportProportionsComponent {
     this.totalVal = 0;
     this.grandTotalVal = 1;
     this.currentYear = '2016';
+    this.country = "Loading....";
 
     router.events.subscribe((event: NavigationEnd) => {
       console.log("event");
@@ -84,18 +86,6 @@ export class ExportProportionsComponent {
       );
   }
 
-  getHS2Data() {
-    this.exportPropService.getHS2Data(this.currentYear, 1, 10)
-    .subscribe(
-      hs2Data => {
-        this.mainPieChartData = hs2Data.data;
-        this.title = hs2Data.title;
-        this.totalVal = hs2Data.total;
-        this.grandTotalVal = hs2Data.total;
-      },
-      error =>  this.errorMessage = <any>error);
-  }
-
   processData(data) {
 
     if(data.url_history != undefined){
@@ -122,6 +112,7 @@ export class ExportProportionsComponent {
     this.mainPieChartData = data.data;
     this.title = data.title;
     this.totalVal = data.total;
+    this.country = data.country;
   }
 
   processHistoryData(data, index, url){

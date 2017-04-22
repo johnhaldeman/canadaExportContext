@@ -25,6 +25,7 @@ var ExportProportionsComponent = (function () {
         this.totalVal = 0;
         this.grandTotalVal = 1;
         this.currentYear = '2016';
+        this.country = "Loading....";
         router.events.subscribe(function (event) {
             console.log("event");
             if (_this.route.snapshot.params['url'] != _this.currentURL) {
@@ -66,16 +67,6 @@ var ExportProportionsComponent = (function () {
             _this.years = yearData;
         }, function (error) { return _this.errorMessage = error; });
     };
-    ExportProportionsComponent.prototype.getHS2Data = function () {
-        var _this = this;
-        this.exportPropService.getHS2Data(this.currentYear, 1, 10)
-            .subscribe(function (hs2Data) {
-            _this.mainPieChartData = hs2Data.data;
-            _this.title = hs2Data.title;
-            _this.totalVal = hs2Data.total;
-            _this.grandTotalVal = hs2Data.total;
-        }, function (error) { return _this.errorMessage = error; });
-    };
     ExportProportionsComponent.prototype.processData = function (data) {
         var _this = this;
         if (data.url_history != undefined) {
@@ -101,6 +92,7 @@ var ExportProportionsComponent = (function () {
         this.mainPieChartData = data.data;
         this.title = data.title;
         this.totalVal = data.total;
+        this.country = data.country;
     };
     ExportProportionsComponent.prototype.processHistoryData = function (data, index, url) {
         console.log("processing: " + url);

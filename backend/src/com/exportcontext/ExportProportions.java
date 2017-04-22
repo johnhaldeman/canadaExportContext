@@ -112,7 +112,7 @@ public class ExportProportions extends HttpServlet {
 				"        AND GEO = 1 \n " +
 				"        AND STATE = 1000 \n " +
 				"        AND COUNTRY = ? \n " +
-				"        GROUP BY CL.HS_2_DESC, ED.year, ED.month \n " +
+				"        GROUP BY CL.HS_2_DESC, ED.year \n " +
 				"), \n " +
 				"summary AS ( \n " +
 				"    SELECT p.*, ROW_NUMBER() OVER (ORDER BY p.value DESC) AS rank \n " +
@@ -150,7 +150,7 @@ public class ExportProportions extends HttpServlet {
 				"        AND GEO = 1 \n " +
 				"        AND STATE = 1000 \n " +
 				"        AND COUNTRY = ? \n " +
-				"        GROUP BY CL.HS_4_DESC, CL.HS_2_DESC, ED.year, ED.month \n " +
+				"        GROUP BY CL.HS_4_DESC, CL.HS_2_DESC, ED.year \n " +
 				"), \n " +
 				"summary AS ( \n" +
 				"    SELECT p.*, ROW_NUMBER() OVER (ORDER BY p.value DESC) AS rank\n" +
@@ -190,7 +190,7 @@ public class ExportProportions extends HttpServlet {
 				"        AND GEO = 1 \n " +
 				"        AND STATE = 1000 \n " +
 				"        AND COUNTRY = ? \n " +
-				"        GROUP BY CL.HS_4_DESC, CL.english_description, ED.year, ED.month \n " +
+				"        GROUP BY CL.HS_4_DESC, CL.english_description, ED.year \n " +
 				"), \n " +
 				"summary AS ( \n" +
 				"    SELECT p.*, ROW_NUMBER() OVER (ORDER BY p.value DESC) AS rank\n" +
@@ -476,6 +476,11 @@ public class ExportProportions extends HttpServlet {
 			rs.close();
 			stmt.close();
 			
+			String postfix = "";
+			if(country != -1){
+				postfix = "&country="+country;
+			}
+			
 			Vector<String> urlHistory = new Vector<String>();
 			
 			int hs2_rank = offset - 1;
@@ -501,7 +506,8 @@ public class ExportProportions extends HttpServlet {
 				urlHistory.add("ExportProportions?year="+year+
 						"&offset="+(histOffset)+
 						"&max="+(histOffset+9)+
-						"&level=2");
+						"&level=2" 
+						+ postfix);
 					
 				histOffset += 10;
 			}
@@ -521,7 +527,8 @@ public class ExportProportions extends HttpServlet {
 						"&offset="+(histOffset)+
 						"&max="+(histOffset+9)+
 						"&level=4"
-						+"&query=" + URLEncoder.encode(hs2Parent, "UTF-8"));
+						+"&query=" + URLEncoder.encode(hs2Parent, "UTF-8")
+						+ postfix);
 					
 				histOffset += 10;
 			}
@@ -533,7 +540,8 @@ public class ExportProportions extends HttpServlet {
 							"&offset="+(histOffset)+
 							"&max="+(histOffset+9)+
 							"&level=6"
-							+"&query=" + URLEncoder.encode(query, "UTF-8"));
+							+"&query=" + URLEncoder.encode(query, "UTF-8")
+							+ postfix);
 						
 					histOffset += 10;
 				}
@@ -543,6 +551,16 @@ public class ExportProportions extends HttpServlet {
 				wr.println(", \"url_history\": ");
 				wr.println(gson.toJson(urlHistory));
 			}
+			
+
+			wr.print(", \"country\": ");
+			if(country == -1){
+				wr.println("\"Global\"");
+			}
+			else{
+				wr.println("\"" + getCountry(conn, country) + "\"");
+			}
+			
 			wr.println("}");
 			
 			
@@ -582,6 +600,28 @@ public class ExportProportions extends HttpServlet {
 		rs.close();
 		stmt.close();
 		return hs4_rank;
+	}
+	
+	private String getCountry(Connection conn, int country) throws SQLException{
+		PreparedStatement stmt;
+		ResultSet rs;
+		String country_label = "";
+		stmt = conn.prepareStatement(""
+				+ "SELECT max(country_label) as country_label \n"
+				+ "   FROM geos \n"
+				+ "WHERE country = ?");
+
+		stmt.setInt(1, country);
+		
+		rs = stmt.executeQuery();
+		
+		if(rs.next())
+			country_label = rs.getString("country_label");
+		else
+			country_label = "";
+		rs.close();
+		stmt.close();
+		return country_label;
 	}
 	
 	private int getHS2Rank(Connection conn, int year, String hs2Parent) throws SQLException {
