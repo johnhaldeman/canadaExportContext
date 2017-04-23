@@ -29,6 +29,7 @@ import com.google.gson.GsonBuilder;
 @WebServlet("/services/ExportProportions")
 public class ExportProportions extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	
 
     /**
      * Default constructor. 
@@ -386,8 +387,6 @@ public class ExportProportions extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
-		//response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
 		response.setContentType("application/json");
 		
 		InitialContext cxt;
@@ -494,7 +493,7 @@ public class ExportProportions extends HttpServlet {
 					return;
 				}
 				
-				hs2_rank = getHS2Rank(conn, year, hs2Parent);
+				hs2_rank = getHS2Rank(conn, year, hs2Parent, country);
 			}
 			if(hs2_rank < 0){
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -515,7 +514,7 @@ public class ExportProportions extends HttpServlet {
 			int hs4_rank = -1;
 			String hs4Parent = query;
 			if(level.equals("6")){
-				hs4_rank = getHS4Rank(conn, year, hs4Parent, hs2Parent);
+				hs4_rank = getHS4Rank(conn, year, hs4Parent, hs2Parent, country);
 			}
 			else if(level.equals("4")){
 				hs4_rank = offset - 1;
@@ -572,24 +571,50 @@ public class ExportProportions extends HttpServlet {
 		}
 	}
 
-	private int getHS4Rank(Connection conn, int year, String hs4Parent, String hs2Parent) throws SQLException {
+	private int getHS4Rank(Connection conn, int year, String hs4Parent, String hs2Parent, int country) throws SQLException {
 		PreparedStatement stmt;
 		ResultSet rs;
 		int hs4_rank;
+		
+		String baseTable = "HS4_PRECOMP";
+		if(country != -1){
+			baseTable = "(\n " +
+					"        SELECT \n " +
+					"        CL.HS_4_DESC, \n " +
+					"        CL.HS_2_DESC, \n " +
+					"        SUM(VALUE) AS VALUE, \n " +
+					"        ED.year \n " +
+					"        FROM EXPORT_DATA ED, CODE_LOOKUP CL \n " +
+					"        WHERE ED.HS_CODE = CL.CODE \n " +
+					"        AND GEO = 1 \n " +
+					"        AND STATE = 1000 \n " +
+					"        AND COUNTRY = ? \n " +
+					"        GROUP BY CL.HS_4_DESC, CL.HS_2_DESC, ED.year \n " +
+					") \n ";
+		}
+		
 		stmt = conn.prepareStatement(""
 				+ "SELECT hs4e.VAL_RANK \n"
 				+ "   FROM ( \n"
 				+ "        SELECT HS_4_DESC, ROW_NUMBER() OVER (ORDER BY SUM(h4.VALUE) desc) VAL_RANK \n"
-				+ "        FROM HS4_PRECOMP h4 \n"
+				+ "        FROM "+baseTable+" h4 \n"
 				+ "        WHERE YEAR = ? \n"
 				+ "        AND HS_2_DESC = ? \n"
 				+ "        GROUP BY h4.HS_4_DESC \n"
 				+ "    ) hs4e \n"
 				+ "WHERE hs4e.HS_4_DESC = ?");
 		
-		stmt.setInt(1, year);
-		stmt.setString(2, hs2Parent);
-		stmt.setString(3, hs4Parent);
+		int i = 1;
+		
+		if(country != -1){
+			stmt.setInt(i, country);
+			i++;
+		}
+		stmt.setInt(i, year);
+		i++;
+		stmt.setString(i, hs2Parent);
+		i++;
+		stmt.setString(i, hs4Parent);
 		
 		rs = stmt.executeQuery();
 		
@@ -624,22 +649,49 @@ public class ExportProportions extends HttpServlet {
 		return country_label;
 	}
 	
-	private int getHS2Rank(Connection conn, int year, String hs2Parent) throws SQLException {
+	private int getHS2Rank(Connection conn, int year, String hs2Parent, int country) throws SQLException {
 		PreparedStatement stmt;
 		ResultSet rs;
 		int hs2_rank;
+		
+		String baseTable;
+		if(country == -1){
+			baseTable = "HS2_PRECOMP";
+		}
+		else{
+			baseTable = "(\n " +
+					"        SELECT \n " +
+					"        CL.HS_2_DESC, \n " +
+					"        SUM(VALUE) AS VALUE, \n " +
+					"        ED.year \n " +
+					"        FROM EXPORT_DATA ED, CODE_LOOKUP CL \n " +
+					"        WHERE ED.HS_CODE = CL.CODE \n " +
+					"        AND GEO = 1 \n " +
+					"        AND STATE = 1000 \n " +
+					"        AND COUNTRY = ? \n " +
+					"        GROUP BY CL.HS_2_DESC, ED.year \n " +
+					") \n ";
+		}
+		
 		stmt = conn.prepareStatement(""
 				+ "SELECT hs2e.VAL_RANK \n"
 				+ "   FROM ( \n"
 				+ "        SELECT HS_2_DESC, ROW_NUMBER() OVER (ORDER BY SUM(h2.VALUE) desc) VAL_RANK \n"
-				+ "        FROM HS2_PRECOMP h2 \n"
+				+ "        FROM "+ baseTable +" h2 \n"
 				+ "        WHERE YEAR = ? \n"
 				+ "        GROUP BY h2.HS_2_DESC \n"
 				+ "    ) hs2e \n"
 				+ "WHERE hs2e.HS_2_DESC = ?");
 
-		stmt.setInt(1, year);
-		stmt.setString(2, hs2Parent);
+		
+		int i = 1;
+		if(country != -1){
+			stmt.setInt(i, country);
+			i++;
+		}
+		stmt.setInt(i, year);
+		i++;
+		stmt.setString(i, hs2Parent);
 		
 		rs = stmt.executeQuery();
 		
