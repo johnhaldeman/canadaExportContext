@@ -10,7 +10,9 @@ export class GoogleChart implements OnChanges  {
   @Input('chartOptions') public chartOptions: Object;
   @Input('chartData') public chartData: Object;
   @Input('test') public test:number;
+  @Input() public action: Object;
   @Output() onSelected = new EventEmitter();
+  public wrapper: any;
 
   constructor(public element: ElementRef) {
     this._element = this.element.nativeElement;
@@ -38,15 +40,15 @@ export class GoogleChart implements OnChanges  {
   }
 
   drawGraphNoParams(){
-    this.drawGraph(this.chartOptions,this.chartType,this.chartData,this._element,this.onSelected);
+    this.drawGraph(this.chartOptions,this.chartType,this.chartData,this._element,this.onSelected,this.action);
   }
 
-  drawGraph (chartOptions,chartType,chartData,ele,onSelected) {
+  drawGraph (chartOptions,chartType,chartData,ele,onSelected,action) {
 
       google.charts.setOnLoadCallback(drawChart);
+
       function drawChart() {
-        var wrapper;
-        wrapper = new google.visualization.ChartWrapper({
+        let wrapper = new google.visualization.ChartWrapper({
                chartType: chartType,
                dataTable:chartData ,
                options:chartOptions || {},
@@ -55,9 +57,11 @@ export class GoogleChart implements OnChanges  {
 
         google.visualization.events.addListener(wrapper, 'select', function(){
             onSelected.emit(wrapper.getChart().getSelection())
-      });
+        });
 
-      wrapper.draw();
+        wrapper.draw();
+
+
     }
   }
 }

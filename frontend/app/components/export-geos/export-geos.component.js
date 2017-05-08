@@ -13,6 +13,7 @@ var core_1 = require("@angular/core");
 var export_geos_service_1 = require("../../services/export_geos.service");
 var export_years_service_1 = require("../../services/export_years.service");
 var router_1 = require("@angular/router");
+var google_chart_1 = require("../google-chart/google-chart");
 var ExportGeosComponent = (function () {
     function ExportGeosComponent(exportPropService, exportYearsService, router) {
         this.exportPropService = exportPropService;
@@ -38,7 +39,8 @@ var ExportGeosComponent = (function () {
             resolution: 'countries',
             region: "world",
             height: window.innerHeight / 1.5,
-            width: window.innerWidth
+            width: window.innerWidth,
+            tooltip: { isHtml: true, trigger: 'selection' }
         };
         this.id = 'geochart1';
         this.chartType = 'GeoChart';
@@ -58,9 +60,30 @@ var ExportGeosComponent = (function () {
             _this.data = new google.visualization.DataTable();
             _this.data.addColumn('string', 'Region');
             _this.data.addColumn('number', 'ExportValue');
-            _this.data.addColumn({ type: 'string', role: 'tooltip' });
+            _this.data.addColumn({ type: 'string', role: 'tooltip', 'p': { 'html': true } });
             _this.getGeoData();
         });
+    };
+    ExportGeosComponent.prototype.reformatDataToHTML = function (data, ids) {
+        var retArray = new Array(data.length);
+        for (var i = 0; i < data.length; i++) {
+            retArray[i] = new Array(3);
+            retArray[i][0] = data[i][0];
+            retArray[i][1] = data[i][1];
+            retArray[i][2] = this.getHTML(data[i][2], data[i][3], data[i][4]);
+        }
+        return retArray;
+    };
+    ExportGeosComponent.prototype.getHTML = function (country, valText, id) {
+        var encodedLink = encodeURIComponent('ExportProportions?' +
+            'year=' + this.year + '&offset=1&max=10&level=2&country='
+            + id);
+        var html = '<strong><u>' + country + '</u></strong></br>'
+            + '<span style="white-space:nowrap">' + valText + '</span></br>'
+            + '<a href="/proportions/'
+            + encodedLink
+            + '">View Products Exported</a>';
+        return html;
     };
     ExportGeosComponent.prototype.getGeoData = function () {
         var _this = this;
@@ -68,7 +91,7 @@ var ExportGeosComponent = (function () {
             .subscribe(function (geoData) {
             geoData.data.shift();
             _this.data.removeRows(0, _this.data.getNumberOfRows());
-            _this.data.addRows(geoData.data);
+            _this.data.addRows(_this.reformatDataToHTML(geoData.data, geoData.ids));
             _this.total = geoData.total;
             _this.grand_total = geoData.grand_total;
             _this.test = geoData.total + "";
@@ -81,12 +104,10 @@ var ExportGeosComponent = (function () {
     };
     ExportGeosComponent.prototype.onRegionSelected = function (event) {
         this.chartOptions.region = event.value;
-        console.log(event.value);
         for (var i = 0; i < this.regions.length; i++) {
             if (this.regions[i][0] == event.value) {
                 this.chartOptions.resolution = this.regions[i][2];
                 this.territory = this.regions[i][1];
-                console.log(this.regions[i]);
             }
         }
         this.test = event.value;
@@ -101,10 +122,13 @@ var ExportGeosComponent = (function () {
     };
     ExportGeosComponent.prototype.onCountrySelected = function (event) {
         var row = event[0].row;
-        this.router.navigate(["proportions", "ExportProportions?year=" + this.year + "&offset=1&max=10&level=2&country=" + this.ids[row]]);
     };
     return ExportGeosComponent;
 }());
+__decorate([
+    core_1.ViewChild(google_chart_1.GoogleChart),
+    __metadata("design:type", google_chart_1.GoogleChart)
+], ExportGeosComponent.prototype, "chart", void 0);
 ExportGeosComponent = __decorate([
     core_1.Component({
         templateUrl: '/app/components/export-geos/templates/exportGeosTemplate.html'

@@ -36,13 +36,12 @@ var GoogleChart = (function () {
         }
     };
     GoogleChart.prototype.drawGraphNoParams = function () {
-        this.drawGraph(this.chartOptions, this.chartType, this.chartData, this._element, this.onSelected);
+        this.drawGraph(this.chartOptions, this.chartType, this.chartData, this._element, this.onSelected, this.action);
     };
-    GoogleChart.prototype.drawGraph = function (chartOptions, chartType, chartData, ele, onSelected) {
+    GoogleChart.prototype.drawGraph = function (chartOptions, chartType, chartData, ele, onSelected, action) {
         google.charts.setOnLoadCallback(drawChart);
         function drawChart() {
-            var wrapper;
-            wrapper = new google.visualization.ChartWrapper({
+            var wrapper = new google.visualization.ChartWrapper({
                 chartType: chartType,
                 dataTable: chartData,
                 options: chartOptions || {},
@@ -72,6 +71,10 @@ __decorate([
     core_1.Input('test'),
     __metadata("design:type", Number)
 ], GoogleChart.prototype, "test", void 0);
+__decorate([
+    core_1.Input(),
+    __metadata("design:type", Object)
+], GoogleChart.prototype, "action", void 0);
 __decorate([
     core_1.Output(),
     __metadata("design:type", Object)

@@ -74,24 +74,24 @@ public class ExportGeos extends HttpServlet {
 			PreparedStatement stmt;
 			if(territory.equals("World")){
 				if(includeUS)
-					sql = "select country_code, value, country_label || ': $' || to_char((value /1000000), '999,999,999') || ' million' as value_text, country_id " //, year, territory_text "
+					sql = "select country_code, value, country_label, '$' || trim(to_char((value /1000000), '999,999,999')) || ' million' as value_text, country_id " //, year, territory_text "
 							+ "from geo_world_precomp "
 							+ "where year = ?";
 				else
-					sql = "select country_code, value, country_label || ': $' || to_char((value /1000000), '999,999,999') || ' million'  as value_text, country_id " //, year, territory_text "
+					sql = "select country_code, value, country_label, '$' || trim(to_char((value /1000000), '999,999,999')) || ' million'  as value_text, country_id " //, year, territory_text "
 							+ "from geo_world_precomp "
 							+ "where year = ? "
 							+ "and country_code <> 'US'";
 				stmt = conn.prepareStatement(sql);
 			}
 			else if(territory.equals("US")){
-				sql = "select state_code, value, state_label || ': $' || to_char((value /1000000), '999,999,999') || ' million'  as value_text, 0 " //, year, territory_text "
+				sql = "select state_code, value, state_label, '$' || trim(to_char((value /1000000), '999,999,999')) || ' million'  as value_text, 0 " //, year, territory_text "
 						+ "from geo_us_precomp "
 						+ "where year = ?";
 				stmt = conn.prepareStatement(sql);
 			}
 			else{
-				sql = "select country_code, value, country_label  || ': $' || to_char((value /1000000), '999,999,999') || ' million'  as value_text, country_id " //, year, territory_text "
+				sql = "select country_code, value, country_label, '$' || trim(to_char((value /1000000), '999,999,999')) || ' million'  as value_text, country_id " //, year, territory_text "
 						+ "from geo_world_precomp "
 						+ "where year = ? "
 						+ "and territory_text = ?";
@@ -118,7 +118,7 @@ public class ExportGeos extends HttpServlet {
 			long totalVal = 0; 
 			while(rs.next()){
 				wr.println(",");
-				Object[] data = new Object[md.getColumnCount() - 1];
+				Object[] data = new Object[md.getColumnCount()];
 				for(int i = 1; i <= data.length; i++){
 					if(rs.getObject(i) == null)
 						data[i - 1] = rs.getObject(i);
