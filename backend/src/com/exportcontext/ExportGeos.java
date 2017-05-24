@@ -45,6 +45,8 @@ public class ExportGeos extends HttpServlet {
 		String yearStr = request.getParameter("year");
 		String territory = request.getParameter("territory");
 		String includeUSStr = request.getParameter("include_us");
+		String hsLevel = request.getParameter("hs_level");
+		String hsCategory = request.getParameter("hs_category");
 		boolean includeUS = false;
 		
 		if(yearStr == null || territory == null || includeUSStr == null){
@@ -72,35 +74,7 @@ public class ExportGeos extends HttpServlet {
 			String sql = "";
 			
 			PreparedStatement stmt;
-			if(territory.equals("World")){
-				if(includeUS)
-					sql = "select country_code, value, country_label, '$' || trim(to_char((value /1000000), '999,999,999')) || ' million' as value_text, country_id " //, year, territory_text "
-							+ "from geo_world_precomp "
-							+ "where year = ?";
-				else
-					sql = "select country_code, value, country_label, '$' || trim(to_char((value /1000000), '999,999,999')) || ' million'  as value_text, country_id " //, year, territory_text "
-							+ "from geo_world_precomp "
-							+ "where year = ? "
-							+ "and country_code <> 'US'";
-				stmt = conn.prepareStatement(sql);
-			}
-			else if(territory.equals("US")){
-				sql = "select state_code, value, state_label, '$' || trim(to_char((value /1000000), '999,999,999')) || ' million'  as value_text, 0 " //, year, territory_text "
-						+ "from geo_us_precomp "
-						+ "where year = ?";
-				stmt = conn.prepareStatement(sql);
-			}
-			else{
-				sql = "select country_code, value, country_label, '$' || trim(to_char((value /1000000), '999,999,999')) || ' million'  as value_text, country_id " //, year, territory_text "
-						+ "from geo_world_precomp "
-						+ "where year = ? "
-						+ "and territory_text = ?";
-				stmt = conn.prepareStatement(sql);
-
-				stmt.setString(2, territory);
-			}
-
-			stmt.setString(1, yearStr);
+			stmt = buildStatement(yearStr, territory, includeUS, hsLevel, hsCategory, conn);
 			
 			ResultSet rs = stmt.executeQuery();
 			
@@ -160,6 +134,72 @@ public class ExportGeos extends HttpServlet {
 			e.printStackTrace();
 		}
 
+	}
+
+	private PreparedStatement buildStatement(String yearStr, String territory, boolean includeUS, String hsLevel, String hsCategory, Connection conn)
+			throws SQLException {
+		String sql;
+		PreparedStatement stmt;
+		
+		if(hsLevel != null && hsCategory != null){
+			String levelDesc = "ENGLISH_DESCRIPTION";
+			if(hsLevel.equals("2")){
+				levelDesc = "HS_2_DESC";
+			}
+			else if(hsLevel.equals("4")){
+				levelDesc = "HS_4_DESC";
+			}
+			sql = "SELECT geo.country_code, SUM(ed.VALUE) AS VALUE, country_label, trim(to_char((SUM(ed.VALUE)/1000000), '999,999,999')) || ' million' as value_text, geo.country as country_id" + 
+					" FROM EXPORT_DATA ED, geos geo, CODE_LOOKUP CL \n"+
+					" WHERE \n"+
+					" ED.GEO = 1 \n"+
+					" AND ED.COUNTRY = GEO.COUNTRY \n"+
+					" AND GEO.STATE IS NULL \n"+
+					" AND ED.STATE = 1000 \n"+
+					" AND ED.COUNTRY <> 999 \n"+
+					" AND ED.HS_CODE = CL.CODE \n"+
+					" AND ED.year = ? \n"+
+					" AND CL."+levelDesc+" = ? \n"+
+					" GROUP BY geo.country_code, geo.country_label, geo.country \n"+
+					" ORDER BY VALUE DESC; \n";
+			stmt = conn.prepareStatement(sql);
+			stmt.setString(2,  hsCategory);
+			stmt.setInt(1, Integer.parseInt(yearStr));
+		}
+		else{
+			if(territory.equals("World")){
+				if(includeUS)
+					sql = "select country_code, value, country_label, '$' || trim(to_char((value /1000000), '999,999,999')) || ' million' as value_text, country_id " //, year, territory_text "
+							+ "from geo_world_precomp "
+							+ "where year = ?";
+				else
+					sql = "select country_code, value, country_label, '$' || trim(to_char((value /1000000), '999,999,999')) || ' million'  as value_text, country_id " //, year, territory_text "
+							+ "from geo_world_precomp "
+							+ "where year = ? "
+							+ "and country_code <> 'US'";
+				stmt = conn.prepareStatement(sql);
+				stmt.setString(1, yearStr);
+			}
+			else if(territory.equals("US")){
+				sql = "select state_code, value, state_label, '$' || trim(to_char((value /1000000), '999,999,999')) || ' million'  as value_text, 0 " //, year, territory_text "
+						+ "from geo_us_precomp "
+						+ "where year = ?";
+				stmt = conn.prepareStatement(sql);
+				stmt.setString(1, yearStr);
+			}
+			else{
+				sql = "select country_code, value, country_label, '$' || trim(to_char((value /1000000), '999,999,999')) || ' million'  as value_text, country_id " //, year, territory_text "
+						+ "from geo_world_precomp "
+						+ "where year = ? "
+						+ "and territory_text = ?";
+				stmt = conn.prepareStatement(sql);
+
+				stmt.setString(2, territory);
+				stmt.setString(1, yearStr);
+			}
+		}
+
+		return stmt;
 	}
 
 }
