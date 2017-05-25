@@ -149,22 +149,63 @@ public class ExportGeos extends HttpServlet {
 			else if(hsLevel.equals("4")){
 				levelDesc = "HS_4_DESC";
 			}
-			sql = "SELECT geo.country_code, SUM(ed.VALUE) AS VALUE, country_label, trim(to_char((SUM(ed.VALUE)/1000000), '999,999,999')) || ' million' as value_text, geo.country as country_id" + 
-					" FROM EXPORT_DATA ED, geos geo, CODE_LOOKUP CL \n"+
-					" WHERE \n"+
-					" ED.GEO = 1 \n"+
-					" AND ED.COUNTRY = GEO.COUNTRY \n"+
-					" AND GEO.STATE IS NULL \n"+
-					" AND ED.STATE = 1000 \n"+
-					" AND ED.COUNTRY <> 999 \n"+
-					" AND ED.HS_CODE = CL.CODE \n"+
-					" AND ED.year = ? \n"+
-					" AND CL."+levelDesc+" = ? \n"+
-					" GROUP BY geo.country_code, geo.country_label, geo.country \n"+
-					" ORDER BY VALUE DESC; \n";
-			stmt = conn.prepareStatement(sql);
-			stmt.setString(2,  hsCategory);
-			stmt.setInt(1, Integer.parseInt(yearStr));
+			if(territory.equals("World")){
+				sql = "SELECT geo.country_code, SUM(ed.VALUE) AS VALUE, country_label, trim(to_char((SUM(ed.VALUE)/1000000), '999,999,999')) || ' million' as value_text, geo.country as country_id" + 
+						" FROM EXPORT_DATA ED, geos geo, CODE_LOOKUP CL \n"+
+						" WHERE \n"+
+						" ED.GEO = 1 \n"+
+						" AND ED.COUNTRY = GEO.COUNTRY \n"+
+						" AND GEO.STATE IS NULL \n"+
+						" AND ED.STATE = 1000 \n"+
+						" AND ED.COUNTRY <> 999 \n"+
+						" AND ED.HS_CODE = CL.CODE \n"+
+						" AND ED.year = ? \n"+
+						" AND CL."+levelDesc+" = ? \n"+
+						" GROUP BY geo.country_code, geo.country_label, geo.country \n"+
+						" ORDER BY VALUE DESC; \n";
+				stmt = conn.prepareStatement(sql);
+				stmt.setString(2,  hsCategory);
+				stmt.setInt(1, Integer.parseInt(yearStr));
+			}
+			else if(territory.equals("US")){
+				sql = "SELECT geo.state_code, SUM(ed.VALUE) AS VALUE, state_label, trim(to_char((SUM(ed.VALUE)/1000000), '999,999,999')) || ' million' as value_text, 0 as country_id" + 
+						" FROM EXPORT_DATA ED, geos geo, CODE_LOOKUP CL \n"+
+						" WHERE \n"+
+						" ED.GEO = 1 \n"+
+						" AND ED.COUNTRY = GEO.COUNTRY \n"+
+						" AND ED.STATE >= 1002 \n"+
+						" AND ED.COUNTRY = 9 \n"+
+						" AND ED.STATE = GEO.STATE \n"+
+						" and state_code IS NOT NULL \n"+
+						" AND ED.HS_CODE = CL.CODE \n"+
+						" AND ED.year = ? \n"+
+						" AND CL."+levelDesc+" = ? \n"+
+						" GROUP BY geo.state_code, geo.state_label \n"+
+						" ORDER BY VALUE DESC; \n";
+				stmt = conn.prepareStatement(sql);
+				stmt.setString(2,  hsCategory);
+				stmt.setInt(1, Integer.parseInt(yearStr));
+			}
+			else{
+				sql = "SELECT geo.country_code, SUM(ed.VALUE) AS VALUE, country_label, trim(to_char((SUM(ed.VALUE)/1000000), '999,999,999')) || ' million' as value_text, geo.country as country_id" + 
+						" FROM EXPORT_DATA ED, geos geo, CODE_LOOKUP CL \n"+
+						" WHERE \n"+
+						" ED.GEO = 1 \n"+
+						" AND ED.COUNTRY = GEO.COUNTRY \n"+
+						" AND GEO.STATE IS NULL \n"+
+						" AND ED.STATE = 1000 \n"+
+						" AND ED.COUNTRY <> 999 \n"+
+						" AND ED.HS_CODE = CL.CODE \n"+
+						" AND ED.year = ? \n"+
+						" AND CL."+levelDesc+" = ? \n"+
+						" AND GEO.territory_text = ? \n" +
+						" GROUP BY geo.country_code, geo.country_label, geo.country \n"+
+						" ORDER BY VALUE DESC; \n";
+				stmt = conn.prepareStatement(sql);
+				stmt.setString(3, territory);
+				stmt.setString(2,  hsCategory);
+				stmt.setInt(1, Integer.parseInt(yearStr));
+			}
 		}
 		else{
 			if(territory.equals("World")){
@@ -181,7 +222,7 @@ public class ExportGeos extends HttpServlet {
 				stmt.setString(1, yearStr);
 			}
 			else if(territory.equals("US")){
-				sql = "select state_code, value, state_label, '$' || trim(to_char((value /1000000), '999,999,999')) || ' million'  as value_text, 0 " //, year, territory_text "
+				sql = "select state_code, value, state_label, '$' || trim(to_char((value /1000000), '999,999,999')) || ' million'  as value_text, 0 as country_id " //, year, territory_text "
 						+ "from geo_us_precomp "
 						+ "where year = ?";
 				stmt = conn.prepareStatement(sql);
