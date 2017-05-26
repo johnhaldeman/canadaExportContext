@@ -15,10 +15,12 @@ var export_years_service_1 = require("../../services/export_years.service");
 var router_1 = require("@angular/router");
 var google_chart_1 = require("../google-chart/google-chart");
 var ExportGeosComponent = (function () {
-    function ExportGeosComponent(exportPropService, exportYearsService, router) {
+    function ExportGeosComponent(exportPropService, exportYearsService, router, route) {
+        var _this = this;
         this.exportPropService = exportPropService;
         this.exportYearsService = exportYearsService;
         this.router = router;
+        this.route = route;
         this.regions = [
             ["world", "World", "countries"],
             ["US", "US", "provinces"],
@@ -30,6 +32,8 @@ var ExportGeosComponent = (function () {
             ["142", "Asia", "countries"],
             ["009", "Oceania", "countries"]
         ];
+        this.id = 'geochart1';
+        this.chartType = 'GeoChart';
         this.test = "";
         this.chartOptions = { displayMode: 'regions',
             colorAxis: { colors: ['F5F3F3', '771111'] },
@@ -42,15 +46,41 @@ var ExportGeosComponent = (function () {
             width: window.innerWidth,
             tooltip: { isHtml: true, trigger: 'selection' }
         };
-        this.id = 'geochart1';
-        this.chartType = 'GeoChart';
         this.include_us = true;
         this.territory = 'World';
-        this.year = '2015';
+        this.year = '2016';
         this.total = 0;
         this.grand_total = 0;
+        router.events.subscribe(function (event) {
+            if (_this.route.snapshot.params['url'] != _this.currentURL) {
+                _this.currentURL = _this.route.snapshot.params['url'];
+                var yearIndex = _this.currentURL.indexOf("year=");
+                _this.year = _this.currentURL.substr(yearIndex + "year=".length, 4);
+                var territoryIndex = _this.currentURL.indexOf("territory=");
+                var afterTerritory = _this.currentURL.substr(territoryIndex + "territory=".length);
+                var territory = afterTerritory.substr(0, afterTerritory.indexOf("&"));
+                _this.territory = territory;
+                _this.switchRegion(territory);
+                var usIndex = _this.currentURL.indexOf("include_us=");
+                _this.include_us = _this.currentURL.substr(usIndex + "include_us=".length) == 'true';
+                _this.redrawOnNavigation();
+            }
+        });
     }
-    ExportGeosComponent.prototype.ngAfterViewInit = function () {
+    ExportGeosComponent.prototype.redrawOnNavigation = function () {
+        if (this.route.snapshot.params['url']) {
+            this.redrawGraph();
+        }
+        else {
+            console.log('renavigating');
+            this.router.navigate(["geos", "ExportGeos?territory=World&year=2015&include_us=true"]);
+        }
+    };
+    ExportGeosComponent.prototype.ngOnInit = function () {
+        this.redrawOnNavigation();
+    };
+    //ngAfterViewInit(){
+    ExportGeosComponent.prototype.redrawGraph = function () {
         var _this = this;
         if (!googleLoaded) {
             googleLoaded = true;
@@ -63,6 +93,47 @@ var ExportGeosComponent = (function () {
             _this.data.addColumn({ type: 'string', role: 'tooltip', 'p': { 'html': true } });
             _this.getGeoData();
         });
+    };
+    ExportGeosComponent.prototype.onRegionSelected = function (event) {
+        console.log(event.value);
+        var terr = 'World';
+        for (var i = 0; i < this.regions.length; i++) {
+            if (this.regions[i][0] == event.value) {
+                terr = this.regions[i][1];
+            }
+        }
+        var newURL = "ExportGeos?territory=" + terr
+            + "&year=" + this.year + "&include_us=" + this.include_us;
+        this.test = newURL;
+        this.router.navigate(["geos", newURL]);
+    };
+    ExportGeosComponent.prototype.switchRegion = function (value) {
+        for (var i = 0; i < this.regions.length; i++) {
+            if (this.regions[i][1] == value) {
+                this.chartOptions.region = this.regions[i][0];
+                this.chartOptions.resolution = this.regions[i][2];
+                this.territory = this.regions[i][1];
+            }
+        }
+        this.test = value;
+    };
+    ExportGeosComponent.prototype.onYearSliderChange = function (event) {
+        if (event.value != this.year) {
+            var newURL = "ExportGeos?territory=" + this.territory
+                + "&year=" + event.value + "&include_us=" + this.include_us;
+            this.test = newURL;
+            this.router.navigate(["geos", newURL]);
+        }
+    };
+    ExportGeosComponent.prototype.includeUSChanged = function (event) {
+        var newURL = "ExportGeos?territory=" + this.territory
+            + "&year=" + this.year + "&include_us=" + event.checked;
+        this.test = newURL;
+        this.router.navigate(["geos", newURL]);
+        this.getGeoData();
+    };
+    ExportGeosComponent.prototype.onCountrySelected = function (event) {
+        var row = event[0].row;
     };
     ExportGeosComponent.prototype.reformatDataToHTML = function (data, ids) {
         var retArray = new Array(data.length);
@@ -98,31 +169,6 @@ var ExportGeosComponent = (function () {
             _this.ids = geoData.ids;
         }, function (error) { return _this.errorMessage = error; });
     };
-    ExportGeosComponent.prototype.includeUSChanged = function (event) {
-        this.include_us = event.checked;
-        this.getGeoData();
-    };
-    ExportGeosComponent.prototype.onRegionSelected = function (event) {
-        this.chartOptions.region = event.value;
-        for (var i = 0; i < this.regions.length; i++) {
-            if (this.regions[i][0] == event.value) {
-                this.chartOptions.resolution = this.regions[i][2];
-                this.territory = this.regions[i][1];
-            }
-        }
-        this.test = event.value;
-        this.getGeoData();
-    };
-    ExportGeosComponent.prototype.onYearSliderChange = function (event) {
-        if (event.value != this.year) {
-            this.year = event.value;
-            this.test = event.value;
-            this.getGeoData();
-        }
-    };
-    ExportGeosComponent.prototype.onCountrySelected = function (event) {
-        var row = event[0].row;
-    };
     return ExportGeosComponent;
 }());
 __decorate([
@@ -135,7 +181,8 @@ ExportGeosComponent = __decorate([
     }),
     __metadata("design:paramtypes", [export_geos_service_1.ExportGeoService,
         export_years_service_1.ExportYearsService,
-        router_1.Router])
+        router_1.Router,
+        router_1.ActivatedRoute])
 ], ExportGeosComponent);
 exports.ExportGeosComponent = ExportGeosComponent;
 //# sourceMappingURL=export-geos.component.js.map

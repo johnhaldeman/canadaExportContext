@@ -16,13 +16,13 @@
           </md-option>
         </md-select>
         <div class="form-check">
-          <md-slide-toggle [disabled]="territory != 'World'" color="accent" checked="true" (change)='includeUSChanged($event)'>
+          <md-slide-toggle [disabled]="territory != 'World'" color="accent" [checked]="include_us" (change)='includeUSChanged($event)'>
             Include US Data
           </md-slide-toggle>
         </div>
       </form>
       <label> Select Year: </label>
-      <md-slider (input)="onYearSliderChange($event)" style="width: 400px" min="2012" max="2017" step="1" value="2015" tick-interval="1" thumbLabel="true"></md-slider>
+      <md-slider (input)="onYearSliderChange($event)" style="width: 400px" min="2012" max="2017" step="1" [value]="year" tick-interval="1" thumbLabel="true"></md-slider>
 
       <br/><br/>
       <div GoogleChart [test]="test" [id]="id" [chartData]="data" [chartOptions]="chartOptions" [chartType]="chartType" [actions]="chartActions" ></div>

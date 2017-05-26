@@ -27,7 +27,6 @@ var ExportProportionsComponent = (function () {
         this.currentYear = '2016';
         this.country = "Loading....";
         router.events.subscribe(function (event) {
-            console.log("event");
             if (_this.route.snapshot.params['url'] != _this.currentURL) {
                 _this.currentURL = _this.route.snapshot.params['url'];
                 var yearIndex = _this.currentURL.indexOf("year=");

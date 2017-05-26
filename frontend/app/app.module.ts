@@ -23,6 +23,7 @@ const appRoutes: Routes = [
   { path: 'proportions', component: ExportProportionsComponent },
   { path: 'proportions/:url', component: ExportProportionsComponent },
   { path: 'geos', component: ExportGeosComponent },
+  { path: 'geos/:url', component: ExportGeosComponent },
   { path: 'about', component: AboutComponent },
   { path: '', component: HomeComponent },
   { path: '**', component: HomeComponent }

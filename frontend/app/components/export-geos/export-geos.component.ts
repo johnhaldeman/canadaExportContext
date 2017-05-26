@@ -2,7 +2,7 @@ import {Component, ViewChild} from '@angular/core';
 import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
 import {ExportGeoService} from '../../services/export_geos.service'
 import {ExportYearsService} from '../../services/export_years.service'
-import {Router } from '@angular/router';
+import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import {GoogleChart} from '../google-chart/google-chart'
 declare var google:any;
 declare var googleLoaded:any;
@@ -31,19 +31,60 @@ export class ExportGeosComponent {
     private errorMessage: string;
     private ids: number[];
     @ViewChild(GoogleChart) chart: GoogleChart;
+    private id = 'geochart1';
+    private chartType = 'GeoChart';
+    private currentURL: string;
 
     constructor(private exportPropService: ExportGeoService,
       private exportYearsService: ExportYearsService,
-      private router: Router) {
+      private router: Router,
+      private route: ActivatedRoute
+    ) {
 
       this.include_us = true;
       this.territory = 'World';
-      this.year = '2015';
+      this.year = '2016';
       this.total = 0;
       this.grand_total = 0;
+
+      router.events.subscribe((event: NavigationEnd) => {
+
+        if(this.route.snapshot.params['url'] != this.currentURL){
+          this.currentURL = this.route.snapshot.params['url'];
+
+          let yearIndex = this.currentURL.indexOf("year=");
+          this.year = this.currentURL.substr(yearIndex + "year=".length, 4);
+
+          let territoryIndex = this.currentURL.indexOf("territory=");
+          let afterTerritory = this.currentURL.substr(territoryIndex + "territory=".length);
+          let territory = afterTerritory.substr(0, afterTerritory.indexOf("&"));
+          this.territory = territory;
+          this.switchRegion(territory);
+
+          let usIndex = this.currentURL.indexOf("include_us=");
+          this.include_us = this.currentURL.substr(usIndex + "include_us=".length) == 'true';
+
+          this.redrawOnNavigation();
+        }
+      });
     }
 
-    ngAfterViewInit(){
+    redrawOnNavigation(){
+        if(this.route.snapshot.params['url']){
+          this.redrawGraph();
+        }
+        else{
+          console.log('renavigating');
+          this.router.navigate(["geos", "ExportGeos?territory=World&year=2015&include_us=true"]);
+        }
+    }
+
+    ngOnInit() {
+      this.redrawOnNavigation();
+    }
+
+    //ngAfterViewInit(){
+    redrawGraph(){
       if(!googleLoaded) {
         googleLoaded = true;
         google.charts.load('upcoming', {'packages':['geochart']});
@@ -58,6 +99,53 @@ export class ExportGeosComponent {
       });
     }
 
+    onRegionSelected(event){
+      console.log(event.value);
+      let terr = 'World';
+      for(let i = 0; i < this.regions.length; i++){
+        if(this.regions[i][0] == event.value){
+          terr = this.regions[i][1];
+        }
+      }
+
+      let newURL = "ExportGeos?territory=" + terr
+              + "&year=" + this.year + "&include_us=" + this.include_us;
+      this.test = newURL;
+      this.router.navigate(["geos", newURL]);
+    }
+
+    switchRegion(value){
+      for(let i = 0; i < this.regions.length; i++){
+        if(this.regions[i][1] == value){
+            this.chartOptions.region = this.regions[i][0];
+            this.chartOptions.resolution = this.regions[i][2];
+            this.territory = this.regions[i][1];
+        }
+      }
+      this.test = value;
+    }
+
+    onYearSliderChange(event){
+      if(event.value != this.year){
+        let newURL = "ExportGeos?territory=" + this.territory
+                + "&year=" + event.value + "&include_us=" + this.include_us;
+        this.test = newURL;
+        this.router.navigate(["geos", newURL]);
+      }
+    }
+
+    includeUSChanged(event){
+      let newURL = "ExportGeos?territory=" + this.territory
+              + "&year=" + this.year + "&include_us=" + event.checked;
+      this.test = newURL;
+      this.router.navigate(["geos", newURL]);
+      this.getGeoData();
+    }
+
+    onCountrySelected(event){
+      let row = event[0].row;
+    }
+
     reformatDataToHTML(data: Object[], ids: Object[]){
       let retArray = new Array(data.length);
       for(let i = 0; i < data.length; i++){
@@ -70,7 +158,6 @@ export class ExportGeosComponent {
     }
 
     getHTML(country: Object, valText: Object, id: Object) : string{
-
       let encodedLink = encodeURIComponent('ExportProportions?' +
         'year=' + this.year + '&offset=1&max=10&level=2&country='
         + id);
@@ -98,37 +185,6 @@ export class ExportGeosComponent {
         error =>  this.errorMessage = <any>error);
     }
 
-    includeUSChanged(event){
-      this.include_us = event.checked;
-      this.getGeoData();
-    }
-
-    onRegionSelected(event){
-      this.chartOptions.region = event.value;
-
-      for(let i = 0; i < this.regions.length; i++){
-        if(this.regions[i][0] == event.value){
-            this.chartOptions.resolution = this.regions[i][2];
-            this.territory = this.regions[i][1];
-        }
-      }
-      this.test = event.value;
-      this.getGeoData();
-
-    }
-
-    onYearSliderChange(event){
-      if(event.value != this.year){
-        this.year = event.value;
-        this.test = event.value;
-        this.getGeoData();
-      }
-    }
-
-    onCountrySelected(event){
-      let row = event[0].row;
-    }
-
     private test = "";
     private chartOptions = {displayMode: 'regions'
         ,colorAxis: {colors: ['F5F3F3', '771111']}
@@ -141,9 +197,6 @@ export class ExportGeosComponent {
         ,tooltip: { isHtml: true, trigger: 'selection' }
     };
 
-    private id = 'geochart1';
-
-    private chartType = 'GeoChart';
 
 
 

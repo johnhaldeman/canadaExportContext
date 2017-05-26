@@ -34,7 +34,6 @@ export class ExportProportionsComponent {
     this.country = "Loading....";
 
     router.events.subscribe((event: NavigationEnd) => {
-      console.log("event");
       if(this.route.snapshot.params['url'] != this.currentURL){
         this.currentURL = this.route.snapshot.params['url'];
 
