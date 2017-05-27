@@ -9,12 +9,17 @@ export class ExportGeoData{
   total: number;
   grand_total: number;
   ids: number[];
+  include_us: string;
+  year: string;
+  territory: string;
+  hs_level: string;
+  hs_category: string;
 }
 
 @Injectable()
 export class ExportGeoService {
 
-  private url = '/services/ExportGeos';
+  private url = '/services';
   constructor(private http: Http) { }
 
   getYearData(): Observable<string[]>{
@@ -23,9 +28,15 @@ export class ExportGeoService {
                     .catch(this.handleError);
   }
 
-  getGeoData(year: string, territory: string, include_us: boolean): Observable<ExportGeoData> {
+  /*getGeoData(year: string, territory: string, include_us: boolean): Observable<ExportGeoData> {
     let url = `${this.url}?year=${year}&territory=${territory}&include_us=${include_us}`;
     return this.http.get(url)
+                    .map(this.extractData)
+                    .catch(this.handleError);
+  }*/
+
+  getGeoData(urlPostfix:string): Observable<ExportGeoData> {
+    return this.http.get(`${this.url}/${urlPostfix}`)
                     .map(this.extractData)
                     .catch(this.handleError);
   }

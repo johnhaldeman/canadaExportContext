@@ -23,16 +23,21 @@ exports.ExportGeoData = ExportGeoData;
 var ExportGeoService = (function () {
     function ExportGeoService(http) {
         this.http = http;
-        this.url = '/services/ExportGeos';
+        this.url = '/services';
     }
     ExportGeoService.prototype.getYearData = function () {
         return this.http.get(this.url)
             .map(this.extractData)
             .catch(this.handleError);
     };
-    ExportGeoService.prototype.getGeoData = function (year, territory, include_us) {
-        var url = this.url + "?year=" + year + "&territory=" + territory + "&include_us=" + include_us;
-        return this.http.get(url)
+    /*getGeoData(year: string, territory: string, include_us: boolean): Observable<ExportGeoData> {
+      let url = `${this.url}?year=${year}&territory=${territory}&include_us=${include_us}`;
+      return this.http.get(url)
+                      .map(this.extractData)
+                      .catch(this.handleError);
+    }*/
+    ExportGeoService.prototype.getGeoData = function (urlPostfix) {
+        return this.http.get(this.url + "/" + urlPostfix)
             .map(this.extractData)
             .catch(this.handleError);
     };

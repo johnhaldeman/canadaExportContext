@@ -121,6 +121,13 @@ public class ExportGeos extends HttpServlet {
 		
 			wr.println(", \"ids\": " + gson.toJson(ids));
 			
+
+			wr.println(", \"territory\": " + gson.toJson(territory));
+			wr.println(", \"year\": " + gson.toJson(yearStr));
+			wr.println(", \"include_us\": " + gson.toJson(includeUSStr));
+			wr.println(", \"hs_level\": " + gson.toJson(hsLevel));
+			wr.println(", \"hs_category\": " + gson.toJson(hsCategory));
+			
 			wr.println("}");
 			
 			rs.close();

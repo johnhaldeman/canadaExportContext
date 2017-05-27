@@ -51,19 +51,6 @@ export class ExportGeosComponent {
 
         if(this.route.snapshot.params['url'] != this.currentURL){
           this.currentURL = this.route.snapshot.params['url'];
-
-          let yearIndex = this.currentURL.indexOf("year=");
-          this.year = this.currentURL.substr(yearIndex + "year=".length, 4);
-
-          let territoryIndex = this.currentURL.indexOf("territory=");
-          let afterTerritory = this.currentURL.substr(territoryIndex + "territory=".length);
-          let territory = afterTerritory.substr(0, afterTerritory.indexOf("&"));
-          this.territory = territory;
-          this.switchRegion(territory);
-
-          let usIndex = this.currentURL.indexOf("include_us=");
-          this.include_us = this.currentURL.substr(usIndex + "include_us=".length) == 'true';
-
           this.redrawOnNavigation();
         }
       });
@@ -171,7 +158,7 @@ export class ExportGeosComponent {
     }
 
     getGeoData() {
-      this.exportPropService.getGeoData(this.year, this.territory, this.include_us)
+      this.exportPropService.getGeoData(this.currentURL)
       .subscribe(
         geoData => {
           geoData.data.shift();
@@ -181,6 +168,10 @@ export class ExportGeosComponent {
           this.grand_total = geoData.grand_total;
           this.test = geoData.total + "";
           this.ids = geoData.ids;
+          this.include_us = geoData.include_us == 'true';
+          this.year = geoData.year;
+          this.territory = geoData.territory;
+          this.switchRegion(this.territory);
         },
         error =>  this.errorMessage = <any>error);
     }

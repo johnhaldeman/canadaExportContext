@@ -54,15 +54,6 @@ var ExportGeosComponent = (function () {
         router.events.subscribe(function (event) {
             if (_this.route.snapshot.params['url'] != _this.currentURL) {
                 _this.currentURL = _this.route.snapshot.params['url'];
-                var yearIndex = _this.currentURL.indexOf("year=");
-                _this.year = _this.currentURL.substr(yearIndex + "year=".length, 4);
-                var territoryIndex = _this.currentURL.indexOf("territory=");
-                var afterTerritory = _this.currentURL.substr(territoryIndex + "territory=".length);
-                var territory = afterTerritory.substr(0, afterTerritory.indexOf("&"));
-                _this.territory = territory;
-                _this.switchRegion(territory);
-                var usIndex = _this.currentURL.indexOf("include_us=");
-                _this.include_us = _this.currentURL.substr(usIndex + "include_us=".length) == 'true';
                 _this.redrawOnNavigation();
             }
         });
@@ -158,7 +149,7 @@ var ExportGeosComponent = (function () {
     };
     ExportGeosComponent.prototype.getGeoData = function () {
         var _this = this;
-        this.exportPropService.getGeoData(this.year, this.territory, this.include_us)
+        this.exportPropService.getGeoData(this.currentURL)
             .subscribe(function (geoData) {
             geoData.data.shift();
             _this.data.removeRows(0, _this.data.getNumberOfRows());
@@ -167,6 +158,10 @@ var ExportGeosComponent = (function () {
             _this.grand_total = geoData.grand_total;
             _this.test = geoData.total + "";
             _this.ids = geoData.ids;
+            _this.include_us = geoData.include_us == 'true';
+            _this.year = geoData.year;
+            _this.territory = geoData.territory;
+            _this.switchRegion(_this.territory);
         }, function (error) { return _this.errorMessage = error; });
     };
     return ExportGeosComponent;
