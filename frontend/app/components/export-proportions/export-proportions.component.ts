@@ -5,7 +5,10 @@ import {ExportProportionService} from '../../services/export_proportions.service
 import {ExportYearsService} from '../../services/export_years.service'
 import {PieChartList} from '../pie-chart-list/PieChartList'
 import {ChartDefinition} from '../chart-definition/ChartDefinition'
-import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
+import {ActivatedRoute, Router, NavigationEnd } from '@angular/router';
+import {ChartActionInterface} from '../chart-definition/ChartActionInterface';
+declare var google:any;
+declare var googleLoaded:any;
 
 @Component({
   //selector: 'trade-app',
@@ -13,7 +16,8 @@ import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 })
 export class ExportProportionsComponent {
   @ViewChild(PieChartList) chartList: PieChartList;
-  private mainPieChartData = [];
+  //private mainPieChartData = [];
+  private data: any;
   private years: string[];
   private title: string;
   private errorMessage: string;
@@ -23,6 +27,7 @@ export class ExportProportionsComponent {
   private routeEventID: number;
   private currentURL: string;
   private country: string;
+  public actions: ChartActionInterface[];
 
   constructor(private exportPropService: ExportProportionService,
     private exportYearsService: ExportYearsService,
@@ -86,7 +91,6 @@ export class ExportProportionsComponent {
   }
 
   processData(data) {
-
     if(data.url_history != undefined){
       this.chartList.chopList(data.url_history.length);
 
@@ -108,14 +112,42 @@ export class ExportProportionsComponent {
       this.grandTotalVal = data.total;
     }
 
-    this.mainPieChartData = data.data;
+    //data.data.shift();
+    //this.data.removeRows(0, this.data.getNumberOfRows());
+    this.data = data.data;
+
     this.title = data.title;
     this.totalVal = data.total;
     this.country = data.country;
+
+    this.actions = this.getActionClosures();
+  }
+
+  reformatDataToHTML(data: Object[]){
+      let retArray = new Array(data.length);
+      for(let i = 0; i < data.length; i++){
+        retArray[i] = new Array(3);
+        retArray[i][0] = data[i][0];
+        retArray[i][1] = data[i][1];
+        //retArray[i][2] = this.getHTML(data[i][0], data[i][1]);
+      }
+      return retArray;
+  }
+
+  getHTML(product: Object, valText: Object) : string{
+    let encodedLink = encodeURIComponent('ExportGeos?' +
+      'year=' + this.currentYear + '&territory=World&include_us=true' +
+      '&hs_level=2&hs_category=Pharmaceutical products');
+
+    let html = '<strong><u>' + product + '</u></strong></br>'
+      + '<span style="white-space:nowrap">' + valText + '</span></br>'
+      + '<a href="/proportions/'
+            + encodedLink
+      + '">View Products Exported</a>';
+    return html;
   }
 
   processHistoryData(data, index, url){
-    console.log("processing: " + url);
     this.chartList.addChartAt(data.data, data.title, data.total, url, index);
   }
 
@@ -124,18 +156,55 @@ export class ExportProportionsComponent {
   }
 
   onNewChartFocus(chart: ChartDefinition){
-      this.mainPieChartData = chart.chartData;
+      this.data = chart.chartData;
       this.title = chart.title;
       this.totalVal = chart.total;
       this.router.navigate(["proportions", chart.url]);
   }
 
-  onMainChartSelected(selected){
+  getActionClosures(){
+
+    function getDrillClosure(data, router){
+      return function(chart){
+        return function(){
+          let row = chart.getSelection()[0].row;
+          let url = data[row + 1][4];
+          router.navigate(["proportions", url]);
+        }
+      }
+    }
+
+    function getGeoClosure(data, router){
+      return function(chart){
+        return function(){
+          let row = chart.getSelection()[0].row;
+          let category = data[row + 1][0];
+          router.navigate(["geos", "ExportGeos?territory=World&include_us=true" +
+                "&year=2015&hs_level=2&hs_category=" + category]);
+        }
+      }
+    }
+
+    return [
+      {
+        id: 'drillDown',
+        text: 'Click to Zoom to Subcategories',
+        action: getDrillClosure(this.data, this.router)
+      },
+      {
+        id: 'viewGeos',
+        text: 'Click to View Export Countries for Category',
+        action: getGeoClosure(this.data, this.router)
+      }
+    ];
+  }
+
+  /*onMainChartSelected(selected){
       if(selected[0]){
         let url = this.mainPieChartData[selected[0].row + 1][4];
         if(url != ''){
           this.router.navigate(["proportions", url]);
         }
       }
-  }
+  }*/
 }

@@ -34,6 +34,8 @@ export class ExportGeosComponent {
     private id = 'geochart1';
     private chartType = 'GeoChart';
     private currentURL: string;
+    private hs_category: string;
+    private hs_level: string;
 
     constructor(private exportPropService: ExportGeoService,
       private exportYearsService: ExportYearsService,
@@ -67,7 +69,7 @@ export class ExportGeosComponent {
     }
 
     ngOnInit() {
-      this.redrawOnNavigation();
+      //this.redrawOnNavigation();
     }
 
     //ngAfterViewInit(){
@@ -97,6 +99,9 @@ export class ExportGeosComponent {
 
       let newURL = "ExportGeos?territory=" + terr
               + "&year=" + this.year + "&include_us=" + this.include_us;
+      if(this.hs_level != 'ALL'){
+        newURL += "&hs_level=" + this.hs_level + "&hs_category=" + this.hs_category;
+      }
       this.test = newURL;
       this.router.navigate(["geos", newURL]);
     }
@@ -172,6 +177,14 @@ export class ExportGeosComponent {
           this.year = geoData.year;
           this.territory = geoData.territory;
           this.switchRegion(this.territory);
+          if(geoData.hs_level == null){
+            this.hs_level = 'ALL';
+            this.hs_category = 'ALL';
+          }
+          else{
+            this.hs_category = geoData.hs_category;
+            this.hs_level = geoData.hs_level;
+          }
         },
         error =>  this.errorMessage = <any>error);
     }

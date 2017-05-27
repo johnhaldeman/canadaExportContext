@@ -25,7 +25,7 @@ var MainPieChart = (function () {
             height: window.innerHeight / 2.5,
             chartArea: { width: "90%", height: "90%" },
             legend: { position: 'right' },
-            tooltip: { trigger: 'focus' }
+            tooltip: { isHtml: false, trigger: 'selection' }
         };
     }
     MainPieChart.prototype.onChildSelected = function (selected) {
@@ -50,6 +50,10 @@ __decorate([
     core_1.Input('chartData'),
     __metadata("design:type", Object)
 ], MainPieChart.prototype, "chartData", void 0);
+__decorate([
+    core_1.Input('actions'),
+    __metadata("design:type", Array)
+], MainPieChart.prototype, "actions", void 0);
 __decorate([
     core_1.Output('onSelected'),
     __metadata("design:type", Object)

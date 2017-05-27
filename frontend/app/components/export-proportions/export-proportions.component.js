@@ -21,7 +21,6 @@ var ExportProportionsComponent = (function () {
         this.exportYearsService = exportYearsService;
         this.route = route;
         this.router = router;
-        this.mainPieChartData = [];
         this.totalVal = 0;
         this.grandTotalVal = 1;
         this.currentYear = '2016';
@@ -88,13 +87,36 @@ var ExportProportionsComponent = (function () {
             this.chartList.clear();
             this.grandTotalVal = data.total;
         }
-        this.mainPieChartData = data.data;
+        //data.data.shift();
+        //this.data.removeRows(0, this.data.getNumberOfRows());
+        this.data = data.data;
         this.title = data.title;
         this.totalVal = data.total;
         this.country = data.country;
+        this.actions = this.getActionClosures();
+    };
+    ExportProportionsComponent.prototype.reformatDataToHTML = function (data) {
+        var retArray = new Array(data.length);
+        for (var i = 0; i < data.length; i++) {
+            retArray[i] = new Array(3);
+            retArray[i][0] = data[i][0];
+            retArray[i][1] = data[i][1];
+            //retArray[i][2] = this.getHTML(data[i][0], data[i][1]);
+        }
+        return retArray;
+    };
+    ExportProportionsComponent.prototype.getHTML = function (product, valText) {
+        var encodedLink = encodeURIComponent('ExportGeos?' +
+            'year=' + this.currentYear + '&territory=World&include_us=true' +
+            '&hs_level=2&hs_category=Pharmaceutical products');
+        var html = '<strong><u>' + product + '</u></strong></br>'
+            + '<span style="white-space:nowrap">' + valText + '</span></br>'
+            + '<a href="/proportions/'
+            + encodedLink
+            + '">View Products Exported</a>';
+        return html;
     };
     ExportProportionsComponent.prototype.processHistoryData = function (data, index, url) {
-        console.log("processing: " + url);
         this.chartList.addChartAt(data.data, data.title, data.total, url, index);
     };
     ExportProportionsComponent.prototype.processError = function (error) {
@@ -102,18 +124,43 @@ var ExportProportionsComponent = (function () {
         return function (error) { return _this.errorMessage = error; };
     };
     ExportProportionsComponent.prototype.onNewChartFocus = function (chart) {
-        this.mainPieChartData = chart.chartData;
+        this.data = chart.chartData;
         this.title = chart.title;
         this.totalVal = chart.total;
         this.router.navigate(["proportions", chart.url]);
     };
-    ExportProportionsComponent.prototype.onMainChartSelected = function (selected) {
-        if (selected[0]) {
-            var url = this.mainPieChartData[selected[0].row + 1][4];
-            if (url != '') {
-                this.router.navigate(["proportions", url]);
-            }
+    ExportProportionsComponent.prototype.getActionClosures = function () {
+        function getDrillClosure(data, router) {
+            return function (chart) {
+                return function () {
+                    var row = chart.getSelection()[0].row;
+                    var url = data[row + 1][4];
+                    router.navigate(["proportions", url]);
+                };
+            };
         }
+        function getGeoClosure(data, router) {
+            return function (chart) {
+                return function () {
+                    var row = chart.getSelection()[0].row;
+                    var category = data[row + 1][0];
+                    router.navigate(["geos", "ExportGeos?territory=World&include_us=true" +
+                            "&year=2015&hs_level=2&hs_category=" + category]);
+                };
+            };
+        }
+        return [
+            {
+                id: 'drillDown',
+                text: 'Click to Zoom to Subcategories',
+                action: getDrillClosure(this.data, this.router)
+            },
+            {
+                id: 'viewGeos',
+                text: 'Click to View Export Countries for Category',
+                action: getGeoClosure(this.data, this.router)
+            }
+        ];
     };
     return ExportProportionsComponent;
 }());

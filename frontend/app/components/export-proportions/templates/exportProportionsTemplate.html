@@ -15,7 +15,7 @@
   </row>
   <row>
     <div class='offset-xs-1 col-xs-10'>
-      <main-pie-chart (onSelected)="onMainChartSelected($event)" [header]="title" [chartData]="mainPieChartData" ></main-pie-chart>
+      <main-pie-chart [header]="title" [chartData]="data" [actions]="actions"></main-pie-chart>
     </div>
     <div class='offset-xs-1 col-xs-10'>
       <div class="text-xs-center" id="example-caption-1">Pie Shows {{(totalVal/grandTotalVal * 100).toFixed(1)}}% of Total Exports</div>

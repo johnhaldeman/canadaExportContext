@@ -1,4 +1,5 @@
 import {Directive,ElementRef,Input,Output,EventEmitter,OnInit,OnChanges,HostListener} from '@angular/core';
+import {ChartActionInterface} from '../chart-definition/ChartActionInterface';
 declare var google:any;
 declare var googleLoaded:any;
 @Directive({
@@ -10,7 +11,7 @@ export class GoogleChart implements OnChanges  {
   @Input('chartOptions') public chartOptions: Object;
   @Input('chartData') public chartData: Object;
   @Input('test') public test:number;
-  @Input() public action: Object;
+  @Input('actions') public actions: ChartActionInterface[];
   @Output() onSelected = new EventEmitter();
   public wrapper: any;
 
@@ -40,10 +41,10 @@ export class GoogleChart implements OnChanges  {
   }
 
   drawGraphNoParams(){
-    this.drawGraph(this.chartOptions,this.chartType,this.chartData,this._element,this.onSelected,this.action);
+    this.drawGraph(this.chartOptions,this.chartType,this.chartData,this._element,this.onSelected,this.actions);
   }
 
-  drawGraph (chartOptions,chartType,chartData,ele,onSelected,action) {
+  drawGraph (chartOptions,chartType,chartData,ele,onSelected,actions) {
 
       google.charts.setOnLoadCallback(drawChart);
 
@@ -59,8 +60,21 @@ export class GoogleChart implements OnChanges  {
             onSelected.emit(wrapper.getChart().getSelection())
         });
 
-        wrapper.draw();
+        function regActions() {
+          if(actions != undefined){
+            for(let i = 0; i < actions.length; i++){
+              wrapper.getChart().setAction({
+                id: actions[i].id,
+                text: actions[i].text,
+                action: actions[i].action(wrapper.getChart())
+              });
+            }
+          }
+        }
 
+        google.visualization.events.addListener(wrapper, 'ready', regActions);
+
+        wrapper.draw();
 
     }
   }

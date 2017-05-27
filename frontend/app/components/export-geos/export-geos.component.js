@@ -68,7 +68,7 @@ var ExportGeosComponent = (function () {
         }
     };
     ExportGeosComponent.prototype.ngOnInit = function () {
-        this.redrawOnNavigation();
+        //this.redrawOnNavigation();
     };
     //ngAfterViewInit(){
     ExportGeosComponent.prototype.redrawGraph = function () {
@@ -95,6 +95,9 @@ var ExportGeosComponent = (function () {
         }
         var newURL = "ExportGeos?territory=" + terr
             + "&year=" + this.year + "&include_us=" + this.include_us;
+        if (this.hs_level != 'ALL') {
+            newURL += "&hs_level=" + this.hs_level + "&hs_category=" + this.hs_category;
+        }
         this.test = newURL;
         this.router.navigate(["geos", newURL]);
     };
@@ -162,6 +165,14 @@ var ExportGeosComponent = (function () {
             _this.year = geoData.year;
             _this.territory = geoData.territory;
             _this.switchRegion(_this.territory);
+            if (geoData.hs_level == null) {
+                _this.hs_level = 'ALL';
+                _this.hs_category = 'ALL';
+            }
+            else {
+                _this.hs_category = geoData.hs_category;
+                _this.hs_level = geoData.hs_level;
+            }
         }, function (error) { return _this.errorMessage = error; });
     };
     return ExportGeosComponent;

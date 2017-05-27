@@ -1,6 +1,7 @@
 import {Component,ElementRef,Input,Output,HostListener,EventEmitter} from '@angular/core';
 import {GoogleChart} from '../google-chart/google-chart';
 import {ChartDefinition} from '../chart-definition/ChartDefinition';
+import {ChartActionInterface} from '../chart-definition/ChartActionInterface';
 
 @Component({
   selector: 'main-pie-chart',
@@ -10,6 +11,7 @@ export class MainPieChart{
     @Input('header') public header:string;
     @Input('chartDefinition') public chartDef: ChartDefinition;
     @Input('chartData') public chartData;
+    @Input('actions') public actions: ChartActionInterface[];
     @Output('onSelected') public onSelected = new EventEmitter();
     public test: number;
 
@@ -28,7 +30,7 @@ export class MainPieChart{
           height: window.innerHeight / 2.5,
           chartArea:{width:"90%",height:"90%"},
           legend: {position: 'right'},
-          tooltip: { trigger: 'focus' }
+          tooltip: { isHtml: false, trigger: 'selection' }
       };
     }
 
