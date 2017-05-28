@@ -69,7 +69,7 @@ export class ExportGeosComponent {
     }
 
     ngOnInit() {
-      //this.redrawOnNavigation();
+      this.redrawOnNavigation();
     }
 
     //ngAfterViewInit(){
@@ -144,7 +144,11 @@ export class ExportGeosComponent {
         retArray[i] = new Array(3);
         retArray[i][0] = data[i][0];
         retArray[i][1] = data[i][1];
-        retArray[i][2] = this.getHTML(data[i][2], data[i][3], data[i][4]);
+        if(this.territory == 'US'){
+          retArray[i][2] = this.getHTMLUSState(data[i][2], data[i][3], data[i][0]);
+        }
+        else
+          retArray[i][2] = this.getHTML(data[i][2], data[i][3], data[i][4]);
       }
       return retArray;
     }
@@ -162,12 +166,26 @@ export class ExportGeosComponent {
       return html;
     }
 
+    getHTMLUSState(stateName: Object, valText: Object, stateCode: Object) : string{
+      let encodedLink = encodeURIComponent('ExportProportions?' +
+        'year=' + this.year + '&offset=1&max=10&level=2&us_state='
+        + stateCode);
+
+      let html = '<strong><u>' + stateName + '</u></strong></br>'
+        + '<span style="white-space:nowrap">' + valText + '</span></br>'
+        + '<a href="/proportions/'
+              + encodedLink
+        + '">View Products Exported</a>';
+      return html;
+    }
+
     getGeoData() {
       this.exportPropService.getGeoData(this.currentURL)
       .subscribe(
         geoData => {
           geoData.data.shift();
           this.data.removeRows(0, this.data.getNumberOfRows());
+          this.territory = geoData.territory;
           this.data.addRows(this.reformatDataToHTML(geoData.data, geoData.ids));
           this.total = geoData.total;
           this.grand_total = geoData.grand_total;
@@ -175,7 +193,6 @@ export class ExportGeosComponent {
           this.ids = geoData.ids;
           this.include_us = geoData.include_us == 'true';
           this.year = geoData.year;
-          this.territory = geoData.territory;
           this.switchRegion(this.territory);
           if(geoData.hs_level == null){
             this.hs_level = 'ALL';

@@ -63,11 +63,13 @@ export class GoogleChart implements OnChanges  {
         function regActions() {
           if(actions != undefined){
             for(let i = 0; i < actions.length; i++){
-              wrapper.getChart().setAction({
-                id: actions[i].id,
-                text: actions[i].text,
-                action: actions[i].action(wrapper.getChart())
-              });
+              if(actions[i].enabled){
+                wrapper.getChart().setAction({
+                  id: actions[i].id,
+                  text: actions[i].text,
+                  action: actions[i].action(wrapper.getChart())
+                });
+              }
             }
           }
         }

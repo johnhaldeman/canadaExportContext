@@ -68,7 +68,7 @@ var ExportGeosComponent = (function () {
         }
     };
     ExportGeosComponent.prototype.ngOnInit = function () {
-        //this.redrawOnNavigation();
+        this.redrawOnNavigation();
     };
     //ngAfterViewInit(){
     ExportGeosComponent.prototype.redrawGraph = function () {
@@ -135,7 +135,11 @@ var ExportGeosComponent = (function () {
             retArray[i] = new Array(3);
             retArray[i][0] = data[i][0];
             retArray[i][1] = data[i][1];
-            retArray[i][2] = this.getHTML(data[i][2], data[i][3], data[i][4]);
+            if (this.territory == 'US') {
+                retArray[i][2] = this.getHTMLUSState(data[i][2], data[i][3], data[i][0]);
+            }
+            else
+                retArray[i][2] = this.getHTML(data[i][2], data[i][3], data[i][4]);
         }
         return retArray;
     };
@@ -150,12 +154,24 @@ var ExportGeosComponent = (function () {
             + '">View Products Exported</a>';
         return html;
     };
+    ExportGeosComponent.prototype.getHTMLUSState = function (stateName, valText, stateCode) {
+        var encodedLink = encodeURIComponent('ExportProportions?' +
+            'year=' + this.year + '&offset=1&max=10&level=2&us_state='
+            + stateCode);
+        var html = '<strong><u>' + stateName + '</u></strong></br>'
+            + '<span style="white-space:nowrap">' + valText + '</span></br>'
+            + '<a href="/proportions/'
+            + encodedLink
+            + '">View Products Exported</a>';
+        return html;
+    };
     ExportGeosComponent.prototype.getGeoData = function () {
         var _this = this;
         this.exportPropService.getGeoData(this.currentURL)
             .subscribe(function (geoData) {
             geoData.data.shift();
             _this.data.removeRows(0, _this.data.getNumberOfRows());
+            _this.territory = geoData.territory;
             _this.data.addRows(_this.reformatDataToHTML(geoData.data, geoData.ids));
             _this.total = geoData.total;
             _this.grand_total = geoData.grand_total;
@@ -163,7 +179,6 @@ var ExportGeosComponent = (function () {
             _this.ids = geoData.ids;
             _this.include_us = geoData.include_us == 'true';
             _this.year = geoData.year;
-            _this.territory = geoData.territory;
             _this.switchRegion(_this.territory);
             if (geoData.hs_level == null) {
                 _this.hs_level = 'ALL';

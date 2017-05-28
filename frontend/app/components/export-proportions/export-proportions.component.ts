@@ -116,6 +116,11 @@ export class ExportProportionsComponent {
     //this.data.removeRows(0, this.data.getNumberOfRows());
     this.data = data.data;
 
+    if(this.data[1][4] == ''){
+      console.log('end of the line');
+      this.drillAction.enabled = false;
+    }
+
     this.title = data.title;
     this.totalVal = data.total;
     this.country = data.country;
@@ -164,39 +169,44 @@ export class ExportProportionsComponent {
 
   getActionClosures(){
 
-    function getDrillClosure(data, router){
-      return function(chart){
-        return function(){
-          let row = chart.getSelection()[0].row;
-          let url = data[row + 1][4];
-          router.navigate(["proportions", url]);
-        }
-      }
-    }
-
     function getGeoClosure(data, router){
       return function(chart){
         return function(){
           let row = chart.getSelection()[0].row;
-          let category = data[row + 1][0];
-          router.navigate(["geos", "ExportGeos?territory=World&include_us=true" +
-                "&year=2015&hs_level=2&hs_category=" + category]);
+          let url = data[row + 1][5];
+          router.navigate(["geos", url]);
         }
       }
     }
 
+    this.drillAction.action = this.getDrillClosure(this.data, this.router);
+
     return [
-      {
-        id: 'drillDown',
-        text: 'Click to Zoom to Subcategories',
-        action: getDrillClosure(this.data, this.router)
-      },
+      this.drillAction,
       {
         id: 'viewGeos',
         text: 'Click to View Export Countries for Category',
-        action: getGeoClosure(this.data, this.router)
+        action: getGeoClosure(this.data, this.router),
+        enabled: true
       }
     ];
+  }
+
+  getDrillClosure(data, router){
+    return function(chart){
+      return function(){
+        let row = chart.getSelection()[0].row;
+        let url = data[row + 1][4];
+        router.navigate(["proportions", url]);
+      }
+    }
+  };
+
+  private drillAction = {
+    id: 'drillDown',
+    text: 'Click to Zoom to Subcategories',
+    action: null,
+    enabled: true
   }
 
   /*onMainChartSelected(selected){
