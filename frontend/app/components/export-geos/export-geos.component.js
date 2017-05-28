@@ -124,7 +124,6 @@ var ExportGeosComponent = (function () {
             + "&year=" + this.year + "&include_us=" + event.checked;
         this.test = newURL;
         this.router.navigate(["geos", newURL]);
-        this.getGeoData();
     };
     ExportGeosComponent.prototype.onCountrySelected = function (event) {
         var row = event[0].row;

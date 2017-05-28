@@ -131,7 +131,6 @@ export class ExportGeosComponent {
               + "&year=" + this.year + "&include_us=" + event.checked;
       this.test = newURL;
       this.router.navigate(["geos", newURL]);
-      this.getGeoData();
     }
 
     onCountrySelected(event){
