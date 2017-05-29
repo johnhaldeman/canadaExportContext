@@ -167,8 +167,10 @@ public class ExportGeos extends HttpServlet {
 						" AND ED.COUNTRY <> 999 \n"+
 						" AND ED.HS_CODE = CL.CODE \n"+
 						" AND ED.year = ? \n"+
-						" AND CL."+levelDesc+" = ? \n"+
-						" GROUP BY geo.country_code, geo.country_label, geo.country \n"+
+						" AND CL."+levelDesc+" = ? \n";
+				if(!includeUS)
+					sql +=" AND geo.country_code <> 'US'";
+				sql +=	" GROUP BY geo.country_code, geo.country_label, geo.country \n"+
 						" ORDER BY VALUE DESC; \n";
 				stmt = conn.prepareStatement(sql);
 				stmt.setString(2,  hsCategory);

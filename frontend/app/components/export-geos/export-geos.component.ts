@@ -121,6 +121,9 @@ export class ExportGeosComponent {
       if(event.value != this.year){
         let newURL = "ExportGeos?territory=" + this.territory
                 + "&year=" + event.value + "&include_us=" + this.include_us;
+        if(this.hs_level != 'ALL'){
+          newURL += "&hs_level=" + this.hs_level + "&hs_category=" + this.hs_category;
+        }
         this.test = newURL;
         this.router.navigate(["geos", newURL]);
       }
@@ -129,6 +132,9 @@ export class ExportGeosComponent {
     includeUSChanged(event){
       let newURL = "ExportGeos?territory=" + this.territory
               + "&year=" + this.year + "&include_us=" + event.checked;
+      if(this.hs_level != 'ALL'){
+             newURL += "&hs_level=" + this.hs_level + "&hs_category=" + this.hs_category;
+      }
       this.test = newURL;
       this.router.navigate(["geos", newURL]);
     }

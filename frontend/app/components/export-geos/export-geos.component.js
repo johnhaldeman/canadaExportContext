@@ -115,6 +115,9 @@ var ExportGeosComponent = (function () {
         if (event.value != this.year) {
             var newURL = "ExportGeos?territory=" + this.territory
                 + "&year=" + event.value + "&include_us=" + this.include_us;
+            if (this.hs_level != 'ALL') {
+                newURL += "&hs_level=" + this.hs_level + "&hs_category=" + this.hs_category;
+            }
             this.test = newURL;
             this.router.navigate(["geos", newURL]);
         }
@@ -122,6 +125,9 @@ var ExportGeosComponent = (function () {
     ExportGeosComponent.prototype.includeUSChanged = function (event) {
         var newURL = "ExportGeos?territory=" + this.territory
             + "&year=" + this.year + "&include_us=" + event.checked;
+        if (this.hs_level != 'ALL') {
+            newURL += "&hs_level=" + this.hs_level + "&hs_category=" + this.hs_category;
+        }
         this.test = newURL;
         this.router.navigate(["geos", newURL]);
     };
