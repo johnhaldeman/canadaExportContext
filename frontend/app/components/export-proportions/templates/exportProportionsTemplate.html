@@ -14,12 +14,22 @@
     </div>
   </row>
   <row>
-    <div class='offset-xs-1 col-xs-10'>
-      <main-pie-chart [header]="title" [chartData]="data" [actions]="actions"></main-pie-chart>
+    <div *ngIf="dataLoaded">
+      <div class='offset-xs-1 col-xs-10'>
+        <main-pie-chart [header]="title" [chartData]="data" [actions]="actions"></main-pie-chart>
+      </div>
+      <div class='offset-xs-1 col-xs-10'>
+        <div class="text-xs-center" id="example-caption-1">Pie Shows {{(totalVal/grandTotalVal * 100).toFixed(1)}}% of Total Exports</div>
+        <md-progress-bar class="example-margin" color="accent" mode="buffer" [value]="(totalVal/grandTotalVal * 100).toFixed(1)" bufferValue="0"> </md-progress-bar>
+      </div>
     </div>
-    <div class='offset-xs-1 col-xs-10'>
-      <div class="text-xs-center" id="example-caption-1">Pie Shows {{(totalVal/grandTotalVal * 100).toFixed(1)}}% of Total Exports</div>
-      <md-progress-bar class="example-margin" color="accent" mode="buffer" [value]="(totalVal/grandTotalVal * 100).toFixed(1)" bufferValue="0"> </md-progress-bar>
+    <div *ngIf="!dataLoaded">
+      <div class='offset-xs-1 col-xs-10'>
+        Loading Export Data....
+        <md-progress-spinner
+            mode="indeterminate">
+        </md-progress-spinner>
+      </div>
     </div>
   </row>
 

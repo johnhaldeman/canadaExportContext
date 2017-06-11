@@ -31,7 +31,7 @@ export class PieChartList{
       height: window.innerHeight / 7,
       chartArea:{width:"95%",height:"95%"},
       legend: {position: 'none'},
-      tooltip: { trigger: 'none' }
+      tooltip: { trigger: 'none', isHtml: false }
     };
     chartDef.chartData = chartData;
     chartDef.titleVisible = false;

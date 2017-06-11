@@ -27,6 +27,7 @@ export class ExportProportionsComponent {
   private routeEventID: number;
   private currentURL: string;
   private country: string;
+  private dataLoaded: boolean;
   public actions: ChartActionInterface[];
 
   constructor(private exportPropService: ExportProportionService,
@@ -37,6 +38,7 @@ export class ExportProportionsComponent {
     this.grandTotalVal = 1;
     this.currentYear = '2016';
     this.country = "Loading....";
+    this.dataLoaded = true;
 
     router.events.subscribe((event: NavigationEnd) => {
       if(this.route.snapshot.params['url'] != this.currentURL){
@@ -69,6 +71,7 @@ export class ExportProportionsComponent {
 
   redrawOnNavigation(){
     if(this.route.snapshot.params['url']){
+      this.dataLoaded = false;
       this.exportPropService.getPropData(this.route.snapshot.params['url'])
       .subscribe(
         data => this.processData(data),
@@ -112,13 +115,14 @@ export class ExportProportionsComponent {
       this.grandTotalVal = data.total;
     }
 
-    //data.data.shift();
-    //this.data.removeRows(0, this.data.getNumberOfRows());
     this.data = data.data;
 
     if(this.data[1][4] == ''){
       console.log('end of the line');
       this.drillAction.enabled = false;
+    }
+    else{
+      this.drillAction.enabled = true;
     }
 
     this.title = data.title;
@@ -126,31 +130,10 @@ export class ExportProportionsComponent {
     this.country = data.country;
 
     this.actions = this.getActionClosures();
+
+    this.dataLoaded = true;
   }
 
-  reformatDataToHTML(data: Object[]){
-      let retArray = new Array(data.length);
-      for(let i = 0; i < data.length; i++){
-        retArray[i] = new Array(3);
-        retArray[i][0] = data[i][0];
-        retArray[i][1] = data[i][1];
-        //retArray[i][2] = this.getHTML(data[i][0], data[i][1]);
-      }
-      return retArray;
-  }
-
-  getHTML(product: Object, valText: Object) : string{
-    let encodedLink = encodeURIComponent('ExportGeos?' +
-      'year=' + this.currentYear + '&territory=World&include_us=true' +
-      '&hs_level=2&hs_category=Pharmaceutical products');
-
-    let html = '<strong><u>' + product + '</u></strong></br>'
-      + '<span style="white-space:nowrap">' + valText + '</span></br>'
-      + '<a href="/proportions/'
-            + encodedLink
-      + '">View Products Exported</a>';
-    return html;
-  }
 
   processHistoryData(data, index, url){
     this.chartList.addChartAt(data.data, data.title, data.total, url, index);
@@ -161,9 +144,9 @@ export class ExportProportionsComponent {
   }
 
   onNewChartFocus(chart: ChartDefinition){
-      this.data = chart.chartData;
-      this.title = chart.title;
-      this.totalVal = chart.total;
+      //this.data = chart.chartData;
+      //this.title = chart.title;
+      //this.totalVal = chart.total;
       this.router.navigate(["proportions", chart.url]);
   }
 
@@ -209,12 +192,4 @@ export class ExportProportionsComponent {
     enabled: true
   }
 
-  /*onMainChartSelected(selected){
-      if(selected[0]){
-        let url = this.mainPieChartData[selected[0].row + 1][4];
-        if(url != ''){
-          this.router.navigate(["proportions", url]);
-        }
-      }
-  }*/
 }

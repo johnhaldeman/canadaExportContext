@@ -31,6 +31,7 @@ var ExportProportionsComponent = (function () {
         this.grandTotalVal = 1;
         this.currentYear = '2016';
         this.country = "Loading....";
+        this.dataLoaded = true;
         router.events.subscribe(function (event) {
             if (_this.route.snapshot.params['url'] != _this.currentURL) {
                 _this.currentURL = _this.route.snapshot.params['url'];
@@ -57,6 +58,7 @@ var ExportProportionsComponent = (function () {
     ExportProportionsComponent.prototype.redrawOnNavigation = function () {
         var _this = this;
         if (this.route.snapshot.params['url']) {
+            this.dataLoaded = false;
             this.exportPropService.getPropData(this.route.snapshot.params['url'])
                 .subscribe(function (data) { return _this.processData(data); }, function (error) { return _this.processError(error); });
         }
@@ -93,38 +95,19 @@ var ExportProportionsComponent = (function () {
             this.chartList.clear();
             this.grandTotalVal = data.total;
         }
-        //data.data.shift();
-        //this.data.removeRows(0, this.data.getNumberOfRows());
         this.data = data.data;
         if (this.data[1][4] == '') {
             console.log('end of the line');
             this.drillAction.enabled = false;
         }
+        else {
+            this.drillAction.enabled = true;
+        }
         this.title = data.title;
         this.totalVal = data.total;
         this.country = data.country;
         this.actions = this.getActionClosures();
-    };
-    ExportProportionsComponent.prototype.reformatDataToHTML = function (data) {
-        var retArray = new Array(data.length);
-        for (var i = 0; i < data.length; i++) {
-            retArray[i] = new Array(3);
-            retArray[i][0] = data[i][0];
-            retArray[i][1] = data[i][1];
-            //retArray[i][2] = this.getHTML(data[i][0], data[i][1]);
-        }
-        return retArray;
-    };
-    ExportProportionsComponent.prototype.getHTML = function (product, valText) {
-        var encodedLink = encodeURIComponent('ExportGeos?' +
-            'year=' + this.currentYear + '&territory=World&include_us=true' +
-            '&hs_level=2&hs_category=Pharmaceutical products');
-        var html = '<strong><u>' + product + '</u></strong></br>'
-            + '<span style="white-space:nowrap">' + valText + '</span></br>'
-            + '<a href="/proportions/'
-            + encodedLink
-            + '">View Products Exported</a>';
-        return html;
+        this.dataLoaded = true;
     };
     ExportProportionsComponent.prototype.processHistoryData = function (data, index, url) {
         this.chartList.addChartAt(data.data, data.title, data.total, url, index);
@@ -134,9 +117,9 @@ var ExportProportionsComponent = (function () {
         return function (error) { return _this.errorMessage = error; };
     };
     ExportProportionsComponent.prototype.onNewChartFocus = function (chart) {
-        this.data = chart.chartData;
-        this.title = chart.title;
-        this.totalVal = chart.total;
+        //this.data = chart.chartData;
+        //this.title = chart.title;
+        //this.totalVal = chart.total;
         this.router.navigate(["proportions", chart.url]);
     };
     ExportProportionsComponent.prototype.getActionClosures = function () {
