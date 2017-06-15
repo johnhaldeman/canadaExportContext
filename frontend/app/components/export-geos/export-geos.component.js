@@ -51,6 +51,7 @@ var ExportGeosComponent = (function () {
         this.year = '2016';
         this.total = 0;
         this.grand_total = 0;
+        this.dataLoaded = true;
         router.events.subscribe(function (event) {
             if (_this.route.snapshot.params['url'] != _this.currentURL) {
                 _this.currentURL = _this.route.snapshot.params['url'];
@@ -64,7 +65,7 @@ var ExportGeosComponent = (function () {
         }
         else {
             console.log('renavigating');
-            this.router.navigate(["geos", "ExportGeos?territory=World&year=2015&include_us=true"]);
+            this.router.navigate(["geos", "ExportGeos?territory=World&year=2016&include_us=true"]);
         }
     };
     ExportGeosComponent.prototype.ngOnInit = function () {
@@ -152,26 +153,27 @@ var ExportGeosComponent = (function () {
         var encodedLink = encodeURIComponent('ExportProportions?' +
             'year=' + this.year + '&offset=1&max=10&level=2&country='
             + id);
-        var html = '<strong><u>' + country + '</u></strong></br>'
-            + '<span style="white-space:nowrap">' + valText + '</span></br>'
-            + '<a href="/proportions/'
+        var html = '<span class="tooltip-text">' + country + '</span></br>'
+            + '<span class="tooltip-text-bold" style="white-space:nowrap">' + valText + '</span><br/><br/>'
+            + '<span class="tooltip-text" style="white-space:nowrap"><a href="/proportions/'
             + encodedLink
-            + '">View Products Exported</a>';
+            + '">View Products Exported Here</a><span>';
         return html;
     };
     ExportGeosComponent.prototype.getHTMLUSState = function (stateName, valText, stateCode) {
         var encodedLink = encodeURIComponent('ExportProportions?' +
             'year=' + this.year + '&offset=1&max=10&level=2&us_state='
             + stateCode);
-        var html = '<strong><u>' + stateName + '</u></strong></br>'
-            + '<span style="white-space:nowrap">' + valText + '</span></br>'
-            + '<a href="/proportions/'
+        var html = '<span class="tooltip-text">' + stateName + '</span></br>'
+            + '<span class="tooltip-text-bold" style="white-space:nowrap">' + valText + '</span><br/><br/>'
+            + '<span class="tooltip-text" style="white-space:nowrap"><a href="/proportions/'
             + encodedLink
-            + '">View Products Exported</a>';
+            + '">View Products Exported Here</a><span>';
         return html;
     };
     ExportGeosComponent.prototype.getGeoData = function () {
         var _this = this;
+        this.dataLoaded = false;
         this.exportPropService.getGeoData(this.currentURL)
             .subscribe(function (geoData) {
             geoData.data.shift();
@@ -193,6 +195,7 @@ var ExportGeosComponent = (function () {
                 _this.hs_category = geoData.hs_category;
                 _this.hs_level = geoData.hs_level;
             }
+            _this.dataLoaded = true;
         }, function (error) { return _this.errorMessage = error; });
     };
     return ExportGeosComponent;

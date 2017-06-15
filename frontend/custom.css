@@ -28,3 +28,13 @@ img { max-width: 100%; height: auto; }
   border-width: 5px;
   border-color: #673ab7;
 }
+
+.tooltip-text{
+  font-family: Arial !important;
+  font-size: 15px !important;
+}
+.tooltip-text-bold{
+  font-family: Arial !important ;
+  font-size: 15px !important ;
+  font-weight: bold !important ;
+}

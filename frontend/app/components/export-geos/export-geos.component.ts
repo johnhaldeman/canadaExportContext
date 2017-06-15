@@ -36,6 +36,7 @@ export class ExportGeosComponent {
     private currentURL: string;
     private hs_category: string;
     private hs_level: string;
+    private dataLoaded: boolean;
 
     constructor(private exportPropService: ExportGeoService,
       private exportYearsService: ExportYearsService,
@@ -48,6 +49,7 @@ export class ExportGeosComponent {
       this.year = '2016';
       this.total = 0;
       this.grand_total = 0;
+      this.dataLoaded = true;
 
       router.events.subscribe((event: NavigationEnd) => {
 
@@ -64,7 +66,7 @@ export class ExportGeosComponent {
         }
         else{
           console.log('renavigating');
-          this.router.navigate(["geos", "ExportGeos?territory=World&year=2015&include_us=true"]);
+          this.router.navigate(["geos", "ExportGeos?territory=World&year=2016&include_us=true"]);
         }
     }
 
@@ -163,11 +165,11 @@ export class ExportGeosComponent {
         'year=' + this.year + '&offset=1&max=10&level=2&country='
         + id);
 
-      let html = '<strong><u>' + country + '</u></strong></br>'
-        + '<span style="white-space:nowrap">' + valText + '</span></br>'
-        + '<a href="/proportions/'
+      let html = '<span class="tooltip-text">' + country + '</span></br>'
+        + '<span class="tooltip-text-bold" style="white-space:nowrap">' + valText + '</span><br/><br/>'
+        + '<span class="tooltip-text" style="white-space:nowrap"><a href="/proportions/'
               + encodedLink
-        + '">View Products Exported</a>';
+        + '">View Products Exported Here</a><span>';
       return html;
     }
 
@@ -176,15 +178,16 @@ export class ExportGeosComponent {
         'year=' + this.year + '&offset=1&max=10&level=2&us_state='
         + stateCode);
 
-      let html = '<strong><u>' + stateName + '</u></strong></br>'
-        + '<span style="white-space:nowrap">' + valText + '</span></br>'
-        + '<a href="/proportions/'
-              + encodedLink
-        + '">View Products Exported</a>';
+        let html = '<span class="tooltip-text">' + stateName + '</span></br>'
+          + '<span class="tooltip-text-bold" style="white-space:nowrap">' + valText + '</span><br/><br/>'
+          + '<span class="tooltip-text" style="white-space:nowrap"><a href="/proportions/'
+                + encodedLink
+          + '">View Products Exported Here</a><span>';
       return html;
     }
 
     getGeoData() {
+      this.dataLoaded = false;
       this.exportPropService.getGeoData(this.currentURL)
       .subscribe(
         geoData => {
@@ -207,6 +210,7 @@ export class ExportGeosComponent {
             this.hs_category = geoData.hs_category;
             this.hs_level = geoData.hs_level;
           }
+          this.dataLoaded = true;
         },
         error =>  this.errorMessage = <any>error);
     }

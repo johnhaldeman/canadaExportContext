@@ -8,7 +8,7 @@
         <!--<select class="form-control" id="yearList" [ngModel]="currentYear" #selectyear (change)="onYearSelected($event, selectyear.value)" >
           <option [value]="year" *ngFor="let year of years">{{year}}</option>
         </select>-->
-        <md-slider (input)="onYearSliderChange($event)" style="width: 400px" min="2012" max="2017" step="1" [value]="currentYear" tick-interval="1" thumbLabel="true"></md-slider>
+        <md-slider (input)="onYearSliderChange($event)" style="width: 400px" min="2012" max="2016" step="1" [value]="currentYear" tick-interval="1" thumbLabel="true"></md-slider>
       </form>
       <br/>
     </div>
@@ -35,13 +35,13 @@
 
 
   <row>
-    <div class='col-xs-12'>
+    <div class='col-xs-12' *ngIf="dataLoaded">
       <h2>Previous Views:</h2>
     </div>
   </row>
   <row>
     <div class='col-xs-12'>
-        <pie-chart-list (onChartFocus)="onNewChartFocus($event)"></pie-chart-list>
+        <pie-chart-list (onChartFocus)="onNewChartFocus($event)" ></pie-chart-list>
     </div>
 
   </row>
